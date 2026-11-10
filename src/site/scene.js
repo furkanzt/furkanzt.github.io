@@ -21,7 +21,7 @@ import {
   Vector3,
   Color,
 } from "three";
-import { LAYOUT, KINDS, lerp, inPoint, outPoint } from "./render.js";
+import { LAYOUT, KINDS, lerp, inPoint, outPoint } from "./router-art.js";
 
 function hexToRgb(hex) {
   const h = hex.trim().replace("#", "");

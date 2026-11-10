@@ -19,7 +19,9 @@
           "Built a curriculum-mining pipeline extracting structured Knowledge Components from official MEB textbooks and Maarif Modeli curricula (grade-5 math and science, 440+ KCs) for an adaptive-learning platform, including prerequisite graphs and BKT/IRT enrichment.",
           "Introduced a TDD/BDD testing discipline (executable Gherkin scenario catalogue, CI-enforced test citations) across my İMPARK codebases; published as an open-source Claude Code plugin.",
           "Orchestrated multiple AI models to rewrite an MEB-curriculum 6th-grade Bilişim Teknolojileri ve Yazılım textbook: separate models draft, verify and fix content through a documented pipeline, aligning kazanım codes and \"bağlam temelli\" (context-based) questions to the 2025 Türkiye Yüzyılı Maarif Modeli."
-        ]
+        ],
+        "id": "impark",
+        "highlight": "I ship an LGS/YKS Question Generator where a second model re-solves every question before release."
       },
       {
         "org": "Güriş Holding",
@@ -37,7 +39,9 @@
         "bullets": [
           "Provided IT helpdesk support, resolving users' computer, account and internet problems by switching access points or connecting them to the remote servers linked to the holding's geothermal, wind and hydroelectric (JES, RES, HES) power plants.",
           "Supported computer updates and resolved hardware and software issues."
-        ]
+        ],
+        "id": "guris",
+        "highlight": "IT helpdesk: I solved users' problems, including connecting them to remote servers linked to power plants."
       }
     ],
     "education": {
@@ -57,12 +61,30 @@
     },
     "projects": [
       {
+        "id": "tofu",
+        "name": "Tofu (personal project)",
+        "tech": "TypeScript · Preact PWA · Cloudflare Workers · D1",
+        "url": null,
+        "text": "Adaptive TOEFL iBT (2026 format) prep app for one real learner, built with Claude Code agents under a test-first harness; live in production on day one and iterated from usage data and learner feedback. 5,000+ automated tests and 3,000+ Gherkin scenarios, linked to tests by an automated check; hard weekly cap on live LLM calls enforced by an atomic SQL reservation.",
+        "links": [
+          {
+            "label": "Tofu demo",
+            "url": "https://furkanzt.github.io/tofu-demo/?lang=en"
+          }
+        ],
+        "cta": "Demo: launching soon",
+        "tagline": "Test-first. Live on day one.",
+        "claim": "An adaptive TOEFL iBT prep app for one real learner, built with Claude Code agents under a test-first harness."
+      },
+      {
         "id": "agenting",
         "name": "claude-agenting (open source)",
         "tech": "Python · Claude Code hooks · Evals",
         "url": "https://github.com/furkanzt/claude-agenting",
-        "text": "Claude Code plugin that routes each subagent to the cheapest model tier that does the job, chosen by an eval harness measuring success rate and cost per run.",
-        "links": []
+        "text": "Claude Code plugin that makes model choice deliberate: every workflow agent must name a model and effort, guided by a routing table measured with evals.",
+        "links": [],
+        "tagline": "Every agent, right-sized.",
+        "claim": "Claude Code plugin: workflow agents must name a model and effort, guided by an eval-measured routing table."
       },
       {
         "id": "tdd-bdd-harness",
@@ -80,30 +102,33 @@
             "gap": "@gap @wip"
           }
         },
-        "explain": {
-          "lead": "Every behaviour a program promises becomes a plain-English scenario tied to a real test, and the build fails when a promise has no working proof.",
+        "tagline": "Promises with receipts.",
+        "claim": "Claude Code plugin tying each scenario to a real test; the build fails if the test is missing.",
+        "story": {
+          "headline": "Say it. Then prove it.",
+          "claim": "Write each promised behaviour as a plain-English scenario tied to a real test; the build fails when proof goes missing.",
           "steps": [
             {
-              "title": "Write the behaviour down",
+              "title": "Write it as a scenario",
               "text": "Each behaviour is written as a short Given / When / Then scenario in plain English, one file per area of the product."
             },
             {
-              "title": "Point it at its proof",
-              "text": "Every scenario names the test that proves it in a “Backed by” line, for example tests/test_pricing.py::test_discount_never_exceeds_cap."
+              "title": "Point it at its test",
+              "text": "Each scenario names the test that proves it in a “Backed by” line, for example tests/test_pricing.py::test_discount_never_exceeds_cap."
             },
             {
-              "title": "Check every link on each push",
+              "title": "Check every link, every push",
               "text": "A guard runs on every push and fails the build when a scenario has no proof, cites a test that no longer exists, or the coverage index is out of date."
             },
             {
-              "title": "Mark what is not proven yet",
+              "title": "Mark what isn't proven yet",
               "text": "A behaviour without a test is allowed only when it is openly tagged @gap @wip. A bare @gap fails the build, and once the gaps reach zero they stay at zero."
             }
           ],
           "deeper": [
             "Citations resolve three forms: Python tests (tests/x.py::test_fn), JavaScript tests (web/src/x.test.ts > does the thing) and checks that only a live system can run (scripts/quality/checks.py::check_fn).",
             "The guard's own checkers are pure functions with red-path proofs on deliberately broken inputs, so the guard is itself tested.",
-            "A new test earns its citation only after it fails against a deliberate mutation of the code it protects.",
+            "The plugin's contract asks that a new test first fail against a deliberate mutation of the code it protects, before it earns its citation.",
             "An adversarial audit playbook lists the ways a green test can still lie, such as self-referential pins and vacuous fixtures, and runs on its own when you say \"audit my tests\".",
             "Behaviour that only a running system can show is a first-class scenario tagged @loop: it runs on a schedule and its citation is still checked on every push.",
             "In the plugin install, three hooks remind Claude at session start, on test edits and on commit. They never block; the guard on each push is the real gate.",
@@ -145,7 +170,9 @@
             "label": "Cobite",
             "url": "https://cobite.kutie.workers.dev"
           }
-        ]
+        ],
+        "tagline": "Bring a friend.",
+        "claim": "Three live browser games, including real-time two-player co-op; unit-tested game and room logic, built with Claude Code."
       },
       {
         "id": "mstodo",
@@ -153,15 +180,19 @@
         "tech": "JavaScript · MCP · Microsoft Graph",
         "url": "https://github.com/furkanzt/claude-mstodo",
         "text": "MCP server and /mstodo planning command that connect Microsoft To Do to Claude Code and Claude Desktop; ships as a Claude Code plugin, a one-click Desktop extension, or from source.",
-        "links": []
+        "links": [],
+        "tagline": "Your to-do list, in conversation.",
+        "claim": "Lets Claude read your Microsoft To Do lists, plan with you, tick tasks off and add notes."
       },
       {
         "id": "yzt-curricula",
         "name": "yzt-curricula (METU AI Society)",
         "tech": "Markdown · Curriculum design",
         "url": "https://github.com/furkanzt/yzt-curricula",
-        "text": "Open self-learning curricula for AI (programming fundamentals and generative AI tracks) written for METU AI Society members and anyone who wants to learn; 13 GitHub stars.",
-        "links": []
+        "text": "Open self-learning curricula for AI (programming fundamentals and generative AI tracks) written for METU AI Society members and anyone who wants to learn.",
+        "links": [],
+        "tagline": "Learn AI, step by step.",
+        "claim": "Open self-learning AI study paths built from public courses, for METU AI Society members and anyone learning."
       },
       {
         "id": "taste-detector",
@@ -169,7 +200,9 @@
         "tech": "Shell · Claude Code hooks",
         "url": "https://github.com/furkanzt/claude-taste-detector",
         "text": "Claude Code plugin that wires Emil Kowalski's design-engineering guides to impeccable's detector findings through a global hook, so motion and feel guidance loads on the first UI edit.",
-        "links": []
+        "links": [],
+        "tagline": "Motion and feel, on cue.",
+        "claim": "Claude Code plugin that nudges Claude toward Emil Kowalski's animation guides on its first interface edit."
       }
     ],
     "research": [
@@ -206,7 +239,7 @@
       "contact": "Contact",
       "email": "Email",
       "emailUni": "Email (university)",
-      "gamesNote": "Some company and campus networks block workers.dev, where the three games run.",
+      "gamesNote": "If a game doesn't load, your network may be blocking workers.dev.",
       "openSource": "Open source",
       "viewOnGitHub": "View on GitHub",
       "playNow": "Play",
@@ -216,13 +249,137 @@
       "stepOf": "Step {n} of {total}",
       "back": "Back",
       "next": "Next",
-      "goDeeper": "Go deeper"
+      "goDeeper": "Go deeper",
+      "work": "Work",
+      "specs": "Specs",
+      "seeHow": "See how it works",
+      "allWork": "All work",
+      "nextProject": "Next project",
+      "fullDetails": "Full details",
+      "now": "Now",
+      "before": "Before",
+      "languages": "Languages",
+      "thesis": "Thesis",
+      "playIt": "Play it",
+      "story": "How it works",
+      "deeperTitle": "Under the hood",
+      "internal": "Internal · no public link",
+      "moreDetails": "More details",
+      "seeTheWork": "See the work",
+      "skillGroups": [
+        "Languages and frameworks",
+        "Cloud and tooling",
+        "AI"
+      ]
+    },
+    "home": {
+      "hero": {
+        "headline": "Built to be checked."
+      },
+      "constellation": {
+        "label": "Selected work",
+        "hint": "Pick a project to open it."
+      },
+      "chapters": [
+        {
+          "id": "agents",
+          "title": "In production. Built with agents.",
+          "body": "Since March 2026 I have built and shipped production LLM systems at İMPARK, with Claude Code as my primary development workflow.",
+          "proofs": [
+            {
+              "ref": "impark-qgen",
+              "line": "A second model re-solves every question before release."
+            },
+            {
+              "ref": "impark-audit",
+              "line": "Multi-agent textbook audit, verified by three votes against page images."
+            },
+            {
+              "ref": "agenting",
+              "line": "Workflow agents must name their model and effort before they run."
+            }
+          ]
+        },
+        {
+          "id": "tests",
+          "title": "Written. Tested. Checked.",
+          "body": "Across my İMPARK codebases I introduced TDD/BDD: behaviours are plain-English scenarios that cite real tests, with citations enforced in CI. Published as an open-source plugin.",
+          "proofs": [
+            {
+              "ref": "tofu",
+              "line": "5,000+ automated tests and 3,000+ Gherkin scenarios, linked by an automated check."
+            },
+            {
+              "ref": "tdd-bdd-harness",
+              "line": "A scenario citing a test that no longer exists fails the build."
+            },
+            {
+              "ref": "kutie-games",
+              "line": "Game and room logic are unit-tested; the code is private."
+            }
+          ]
+        },
+        {
+          "id": "ships",
+          "title": "Things you can open.",
+          "body": "Three live browser games on Cloudflare, including real-time two-player co-op, and four open-source Claude Code plugins on GitHub. Each one has a public link.",
+          "proofs": [
+            {
+              "ref": "kutie-games",
+              "line": "Matching Numbers, Arrow Escape and Cobite: share a room code, play live with a friend."
+            },
+            {
+              "ref": "mstodo",
+              "line": "Connects Microsoft To Do to Claude Code and Claude Desktop."
+            },
+            {
+              "ref": "taste-detector",
+              "line": "Points Claude to Emil Kowalski's animation guides on its first UI edit."
+            }
+          ]
+        },
+        {
+          "id": "education",
+          "title": "Fluent in education.",
+          "body": "A METU degree in Computer Education and Instructional Technology. I have taught Python and machine learning, and now build AI pipelines for MEB textbooks and curricula at İMPARK.",
+          "proofs": [
+            {
+              "ref": "impark-kc",
+              "line": "440+ knowledge components mined from MEB grade-5 math and science."
+            },
+            {
+              "ref": "thesis",
+              "line": "I'm researching agentic-AI-driven technical management that accounts for technical debt."
+            },
+            {
+              "ref": "yzt-curricula",
+              "line": "Free self-learning AI study paths built from public courses, open to anyone."
+            }
+          ]
+        }
+      ],
+      "specs": {
+        "title": "Tech Specs",
+        "lead": "Roles, degrees, skills and languages: the CV at a glance."
+      },
+      "contact": {
+        "title": "Start the conversation.",
+        "body": "Open to new opportunities. Write by email or on LinkedIn; the open-source code is on GitHub."
+      },
+      "refs": {
+        "impark-qgen": "LGS/YKS Question Generator",
+        "impark-audit": "Textbook audit pipeline",
+        "impark-kc": "Curriculum-mining pipeline",
+        "thesis": "M.S. research, METU (in progress)",
+        "ai-society": "METU AI Society"
+      },
+      "refsNote": "at İMPARK"
     }
   },
   "tr": {
     "name": "Mustafa Furkan Özateş",
     "title": "Mustafa Furkan Özateş — AI-native mühendis",
-    "headline": "AI-native mühendis: kodlama ajanlarıyla üretim LLM sistemleri kuran, test eden ve doğrulayan.",
+    "headline": "AI-native mühendis: kodlama ajanlarıyla kurulan, test edilen ve doğrulanan canlı LLM sistemleri.",
     "experience": [
       {
         "org": "İMPARK Eğitim Bilişim LTD",
@@ -239,7 +396,9 @@
           "MEB ders kitaplarından ve Maarif Modeli öğretim programlarından yapılandırılmış Knowledge Component'ler çıkaran bir müfredat madenciliği hattı kurdum (5. sınıf matematik ve fen, 440+ KC); uyarlanabilir öğrenme platformu için ön koşul grafikleri ve BKT/IRT zenginleştirmesi içeriyor.",
           "İMPARK kod tabanlarında TDD/BDD test disiplini başlattım (çalıştırılabilir Gherkin senaryo kataloğu, CI ile zorunlu test atıfları); açık kaynaklı bir Claude Code eklentisi olarak yayımlandı.",
           "Yapay zekâ modellerinin orkestrasyonuyla 6. sınıf Bilişim Teknolojileri ve Yazılım ders kitabının MEB müfredatına göre yeniden yazımını yönettim; ayrı modeller taslak üretme, doğrulama ve düzeltme aşamalarını belgelenmiş bir hatta yürüttü; kazanım kodları ve \"bağlam temelli\" soruları 2025 Türkiye Yüzyılı Maarif Modeli'ne hizaladım."
-        ]
+        ],
+        "id": "impark",
+        "highlight": "LGS/YKS Question Generator'ı geliştirip yayına alıyorum: her soru, yayından önce ikinci bir model tarafından yeniden çözülür."
       },
       {
         "org": "Güriş Holding",
@@ -257,7 +416,9 @@
         "bullets": [
           "BT yardım masası desteği verdim; kullanıcıların bilgisayar, hesap ve internet sorunlarını erişim noktalarını değiştirerek veya holdingin JES, RES ve HES santrallerine bağlı uzak sunuculara bağlayarak çözdüm.",
           "Bilgisayar güncellemelerinde destek verdim; donanım ve yazılım sorunlarını giderdim."
-        ]
+        ],
+        "id": "guris",
+        "highlight": "BT yardım masası: santrallere bağlı uzak sunuculara bağlantı dahil, kullanıcı sorunlarını çözdüm."
       }
     ],
     "education": {
@@ -277,12 +438,30 @@
     },
     "projects": [
       {
+        "id": "tofu",
+        "name": "Tofu (kişisel proje)",
+        "tech": "TypeScript · Preact PWA · Cloudflare Workers · D1",
+        "url": null,
+        "text": "Gerçek bir öğrenci için uyarlanabilir TOEFL iBT (2026) hazırlık PWA'sı; Claude Code ajanlarıyla test öncelikli kuruldu, ilk gün üretimde; kullanım verisi ve öğrenci geri bildirimiyle geliştirildi. 5.000+ test, otomatik denetimle testlere bağlı 3.000+ Gherkin senaryosu; canlı LLM çağrılarına atomik SQL ile haftalık bütçe sınırı.",
+        "links": [
+          {
+            "label": "Tofu demosu",
+            "url": "https://furkanzt.github.io/tofu-demo/?lang=tr"
+          }
+        ],
+        "cta": "Demo: çok yakında",
+        "tagline": "Test öncelikli. İlk günden yayında.",
+        "claim": "Gerçek bir öğrenci için, Claude Code ajanlarıyla test öncelikli kurulan uyarlanabilir TOEFL iBT hazırlık uygulaması."
+      },
+      {
         "id": "agenting",
         "name": "claude-agenting (açık kaynak)",
         "tech": "Python · Claude Code hooks · Evals",
         "url": "https://github.com/furkanzt/claude-agenting",
-        "text": "Her alt ajanı, başarı oranı ve çalıştırma başına maliyeti ölçen bir değerlendirme (eval) düzeneğiyle işi yapabilen en ucuz model katmanına yönlendiren Claude Code eklentisi.",
-        "links": []
+        "text": "Model seçimini bilerek yapılan bir karara dönüştüren Claude Code eklentisi: iş akışındaki her ajan bir model ve efor düzeyi belirtmek zorundadır; seçim, eval'larla ölçülmüş bir yönlendirme tablosuna dayanır.",
+        "links": [],
+        "tagline": "Her ajan, kendi ölçüsünde.",
+        "claim": "Claude Code eklentisi: iş akışı ajanları bir model ve efor düzeyi belirtmek zorundadır; seçim, eval'larla ölçülmüş bir yönlendirme tablosuna dayanır."
       },
       {
         "id": "tdd-bdd-harness",
@@ -300,35 +479,38 @@
             "gap": "@gap @wip"
           }
         },
-        "explain": {
-          "lead": "Bir programın vaat ettiği her davranış, gerçek bir teste bağlı ve sade bir dille yazılmış bir senaryoya dönüşür; çalışan bir kanıtı olmayan vaat derlemeyi (build) durdurur.",
+        "tagline": "Vaatler, kanıtlı.",
+        "claim": "Her senaryoyu gerçek bir teste bağlayan Claude Code eklentisi; test yoksa derleme başarısız olur.",
+        "story": {
+          "headline": "Önce söz. Sonra kanıt.",
+          "claim": "Vaat ettiğiniz her davranışı sade bir senaryo olarak yazın, gerçek bir teste bağlayın. Kanıt kaybolursa derleme başarısız olur.",
           "steps": [
             {
-              "title": "Davranışı yaz",
-              "text": "Her davranış, ürünün her alanı için ayrı bir dosyada, sade bir dille kısa bir Given / When / Then senaryosu olarak yazılır."
+              "title": "Senaryo olarak yazın",
+              "text": "Her davranış, sade bir dille kısa bir Given / When / Then senaryosu olarak yazılır; ürünün her alanı kendi dosyasında durur."
             },
             {
-              "title": "Kanıtına bağla",
+              "title": "Testine bağlayın",
               "text": "Her senaryo, kendisini kanıtlayan testi bir “Backed by” satırında belirtir; örneğin tests/test_pricing.py::test_discount_never_exceeds_cap."
             },
             {
-              "title": "Her push'ta bağlantıları denetle",
-              "text": "Her push'ta çalışan bir denetleyici; kanıtı olmayan, artık var olmayan bir teste atıf yapan bir senaryo ya da güncelliğini yitirmiş bir kapsam dizini bulduğunda derlemeyi durdurur."
+              "title": "Her bağı, her push'ta denetleyin",
+              "text": "Her push'ta bir denetleyici çalışır. Bir senaryonun kanıtı yoksa, senaryo artık var olmayan bir teste dayanıyorsa ya da kapsam dizini güncel değilse derleme başarısız olur."
             },
             {
-              "title": "Henüz kanıtlanmayanı işaretle",
-              "text": "Testi olmayan bir davranışa ancak açıkça @gap @wip etiketiyle izin verilir. Tek başına @gap derlemeyi durdurur; eksik sayısı sıfıra indiğinde bir daha artamaz."
+              "title": "Henüz kanıtlanmayanı işaretleyin",
+              "text": "Testi olmayan bir davranışa yalnızca açıkça @gap @wip olarak etiketlenirse izin verilir. Yalnız @gap etiketi derlemeyi başarısız kılar; eksik sayısı sıfıra indiğinde bir daha yükselemez."
             }
           ],
           "deeper": [
-            "Atıflar üç biçimde çözülür: Python testleri (tests/x.py::test_fn), JavaScript testleri (web/src/x.test.ts > does the thing) ve yalnızca çalışan bir sistemin yürütebileceği denetimler (scripts/quality/checks.py::check_fn).",
-            "Denetleyicinin kendi kontrolleri, bilerek bozulmuş girdilerle kırmızı yol kanıtları olan saf fonksiyonlardır; yani denetleyicinin kendisi de test edilir.",
-            "Yeni bir test, atfını ancak koruduğu kodun bilerek değiştirilmiş (mutasyona uğratılmış) bir sürümünde başarısız olduktan sonra kazanır.",
-            "Çekişmeli bir denetim rehberi, yeşil bir testin yine de yanıltabileceği yolları (kendine atıf yapan sabitlemeler, boş fixture'lar gibi) listeler ve \"audit my tests\" denince tek başına çalışır.",
-            "Yalnızca çalışan bir sistemin gösterebileceği davranışlar @loop etiketli birinci sınıf senaryolardır: zamanlanmış olarak çalışır, atıfları yine her push'ta denetlenir.",
-            "Eklenti kurulumunda üç hook, oturum başında, test düzenlenirken ve commit sırasında Claude'a hatırlatma yapar. Hiçbiri engellemez; asıl kapı her push'taki denetleyicidir.",
-            "Kurulum isteğe bağlıdır: her projede bir kez sorar ve verilen hayır cevabını hatırlar.",
-            "İddia etmediği şey: denetleyici her senaryonun gerçek bir teste bağlandığını denetler, kodun her satırının bir senaryosu olduğunu değil. Kanıtlanmamış vaatleri görünür kılar."
+            "Denetleyici üç tür atfı tanır: Python testleri (tests/x.py::test_fn), JavaScript testleri (web/src/x.test.ts > does the thing) ve yalnızca çalışan bir sistemin yürütebileceği denetimler (scripts/quality/checks.py::check_fn).",
+            "Denetleyicinin kontrolleri saf fonksiyonlardır; her biri, bilerek bozulmuş girdilerde hata verdiği gösterilerek test edilir. Yani denetleyici de denetlenir.",
+            "Eklentinin sözleşmesine göre yeni bir test, koruduğu kod bilerek bozulduğunda (mutasyon) önce hata vermeli; atıf hakkını ancak böyle kazanır.",
+            "Şüpheci bir denetim rehberi, yeşil bir testin yine de yanıltabileceği durumları listeler (kendi sonucunu kendisi doğrulayan sabitlemeler, içi boş fixture'lar gibi); “audit my tests” dediğinizde kendiliğinden devreye girer.",
+            "Yalnızca çalışan bir sistemde görülebilen davranışlar da @loop etiketiyle tam birer senaryo sayılır: belirli aralıklarla çalışır, atıfları yine her push'ta denetlenir.",
+            "Eklenti kurulumunda üç hook, oturum başında, test düzenlenirken ve commit sırasında Claude'a hatırlatır. Hiçbiri engellemez; asıl kapı her push'taki denetleyicidir.",
+            "Kullanımı isteğe bağlıdır: eklenti her projede bir kez sorar, “hayır” derseniz bunu hatırlar.",
+            "Neyi iddia etmez: denetleyici her senaryonun gerçek bir teste bağlı olduğunu denetler, kodun her satırının bir senaryosu olduğunu değil. Kanıtlanmamış vaatleri görünür kılar."
           ],
           "links": [
             {
@@ -336,7 +518,7 @@
               "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/SKILL.md"
             },
             {
-              "label": "Çekişmeli denetim rehberi",
+              "label": "Şüpheci denetim rehberi",
               "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/reference/audit.md"
             },
             {
@@ -365,7 +547,9 @@
             "label": "Cobite",
             "url": "https://cobite.kutie.workers.dev"
           }
-        ]
+        ],
+        "tagline": "Arkadaşınızı da çağırın.",
+        "claim": "Üç canlı tarayıcı oyunu, gerçek zamanlı iki kişilik Birlikte modu dahil; oyun ve oda mantığı birim testleriyle korunur, Claude Code'la geliştirildi."
       },
       {
         "id": "mstodo",
@@ -373,15 +557,19 @@
         "tech": "JavaScript · MCP · Microsoft Graph",
         "url": "https://github.com/furkanzt/claude-mstodo",
         "text": "Microsoft To Do'yu Claude Code ve Claude Desktop'a bağlayan MCP sunucusu ve /mstodo planlama komutu; Claude Code eklentisi, tek tıkla kurulan Claude Desktop uzantısı ya da kaynaktan kurulum olarak sunuluyor.",
-        "links": []
+        "links": [],
+        "tagline": "Yapılacaklarınız, sohbetin içinde.",
+        "claim": "Claude, Microsoft To Do listelerinizi okur, sizinle plan yapar, biten görevleri işaretler ve not ekler."
       },
       {
         "id": "yzt-curricula",
         "name": "yzt-curricula (ODTÜ Yapay Zekâ Topluluğu)",
         "tech": "Markdown · Müfredat tasarımı",
         "url": "https://github.com/furkanzt/yzt-curricula",
-        "text": "ODTÜ Yapay Zekâ Topluluğu üyeleri ve öğrenmek isteyen herkes için yazılmış açık yapay zekâ öz-öğrenme müfredatları (programlama temelleri ve üretken yapay zekâ parkurları); GitHub'da 13 yıldız.",
-        "links": []
+        "text": "ODTÜ Yapay Zekâ Topluluğu üyeleri ve öğrenmek isteyen herkes için yazılmış açık yapay zekâ öz-öğrenme müfredatları (programlama temelleri ve üretken yapay zekâ parkurları).",
+        "links": [],
+        "tagline": "Yapay zekâyı adım adım öğrenin.",
+        "claim": "Açık derslerden derlenen yapay zekâ öz-öğrenme yolları; ODTÜ Yapay Zekâ Topluluğu üyeleri ve öğrenmek isteyen herkes için."
       },
       {
         "id": "taste-detector",
@@ -389,12 +577,14 @@
         "tech": "Shell · Claude Code hooks",
         "url": "https://github.com/furkanzt/claude-taste-detector",
         "text": "Emil Kowalski'nin tasarım mühendisliği kılavuzlarını impeccable'ın dedektör bulgularına genel (global) bir hook ile bağlayan Claude Code eklentisi; ilk arayüz düzenlemesinde hareket ve his rehberi otomatik yüklenir.",
-        "links": []
+        "links": [],
+        "tagline": "Hareket ve his, tam zamanında.",
+        "claim": "İlk arayüz düzenlemesinde Claude'a Emil Kowalski'nin animasyon rehberlerini hatırlatan Claude Code eklentisi."
       }
     ],
     "research": [
       {
-        "title": "Araştırma Stajyeri, ODTÜ BÖTE — LLM tabanlı Yazım Asistanı (\"Peer Feedback with LLM\")",
+        "title": "Araştırma Stajyeri, ODTÜ BÖTE — LLM tabanlı Yazma Asistanı (\"Peer Feedback with LLM\")",
         "dates": "Eki 2024 – Haz 2025",
         "people": "Öğretim üyesi: Doç. Dr. Erkan Er"
       },
@@ -404,7 +594,7 @@
         "people": "Öğretim üyeleri: Prof. Dr. Soner Yıldırım, Doç. Dr. Göknur Kaplan, Doç. Dr. Erkan Er"
       },
       {
-        "title": "Başkan, ODTÜ Yapay Zekâ Topluluğu — Python ve Makine Öğrenmesi dersleri verdi",
+        "title": "Başkan, ODTÜ Yapay Zekâ Topluluğu — Python ve Makine Öğrenmesi dersleri verdim",
         "dates": "May 2024 – Haz 2025",
         "people": ""
       }
@@ -415,7 +605,7 @@
     ],
     "availability": "Yeni fırsatlara açığım.",
     "location": "Ankara, Türkiye",
-    "description": "Mustafa Furkan Özateş: Ankara'da AI-native mühendis. Kodlama ajanlarıyla üretim LLM sistemleri kuran, test eden ve doğrulayan.",
+    "description": "Mustafa Furkan Özateş: Ankara'da AI-native mühendis. Kodlama ajanlarıyla kurulan, test edilen ve doğrulanan canlı LLM sistemleri.",
     "ui": {
       "toggle": "Dil",
       "experience": "Deneyim",
@@ -426,17 +616,141 @@
       "contact": "İletişim",
       "email": "E-posta",
       "emailUni": "E-posta (üniversite)",
-      "gamesNote": "Bazı şirket ve kampüs ağları, üç oyunun çalıştığı workers.dev adreslerini engelliyor.",
+      "gamesNote": "Bir oyun açılmazsa, ağınız workers.dev'i engelliyor olabilir.",
       "openSource": "Açık kaynak",
-      "viewOnGitHub": "GitHub'da gör",
-      "playNow": "Oyna",
+      "viewOnGitHub": "GitHub'da inceleyin",
+      "playNow": "Oynayın",
       "cv": "Özgeçmiş (PDF)",
       "howItWorks": "Nasıl çalışır",
       "stepsCount": "{n} adım",
       "stepOf": "Adım {n} / {total}",
       "back": "Geri",
       "next": "İleri",
-      "goDeeper": "Daha derine in"
+      "goDeeper": "Daha derine in",
+      "work": "İşler",
+      "specs": "Teknik Özellikler",
+      "seeHow": "Nasıl çalıştığını görün",
+      "allWork": "Tüm işler",
+      "nextProject": "Sonraki proje",
+      "fullDetails": "Tüm ayrıntılar",
+      "now": "Bugün",
+      "before": "Daha önce",
+      "languages": "Diller",
+      "thesis": "Tez",
+      "playIt": "Oynayın",
+      "story": "Nasıl çalışır",
+      "deeperTitle": "Perde arkası",
+      "internal": "Kurum içi · herkese açık bağlantı yok",
+      "moreDetails": "Daha fazla ayrıntı",
+      "seeTheWork": "İşlere göz atın",
+      "skillGroups": [
+        "Diller ve çatılar",
+        "Bulut ve araçlar",
+        "Yapay zekâ"
+      ]
+    },
+    "home": {
+      "hero": {
+        "headline": "Sınanmak için yapıldı."
+      },
+      "constellation": {
+        "label": "Öne çıkan işler",
+        "hint": "Açmak için bir proje seçin."
+      },
+      "chapters": [
+        {
+          "id": "agents",
+          "title": "Yayında. Ajanlarla geliştirildi.",
+          "body": "Mart 2026'dan beri İMPARK'ta canlıda çalışan LLM sistemleri geliştirip yayına alıyorum. Ana geliştirme aracım Claude Code.",
+          "proofs": [
+            {
+              "ref": "impark-qgen",
+              "line": "Yayından önce her soruyu ikinci bir model baştan çözer."
+            },
+            {
+              "ref": "impark-audit",
+              "line": "Çok ajanlı ders kitabı denetimi; bulgular, sayfa görüntüleri üzerinden üç oylamayla doğrulanır."
+            },
+            {
+              "ref": "agenting",
+              "line": "İş akışındaki her ajan, çalışmadan önce modelini ve efor düzeyini belirtmek zorundadır."
+            }
+          ]
+        },
+        {
+          "id": "tests",
+          "title": "Yazıldı. Sınandı. Denetlendi.",
+          "body": "İMPARK'taki kod tabanlarıma TDD/BDD disiplinini getirdim: davranışlar sade senaryolar olarak yazılır ve gerçek testlere bağlanır; bu bağ CI'da denetlenir. Açık kaynak bir Claude Code eklentisi olarak da yayımlandı.",
+          "proofs": [
+            {
+              "ref": "tofu",
+              "line": "5.000+ test ve otomatik denetimle testlere bağlı 3.000+ Gherkin senaryosu."
+            },
+            {
+              "ref": "tdd-bdd-harness",
+              "line": "Dayandığı test silinen senaryo, derlemeyi başarısız kılar."
+            },
+            {
+              "ref": "kutie-games",
+              "line": "Oyun ve oda mantığı birim testleriyle korunur; kaynak kodu kapalı."
+            }
+          ]
+        },
+        {
+          "id": "ships",
+          "title": "Açın. Deneyin.",
+          "body": "Cloudflare'de üç canlı tarayıcı oyunu (gerçek zamanlı, iki kişilik Birlikte modu dahil) ve GitHub'da dört açık kaynak Claude Code eklentisi. Hepsinin herkese açık bir bağlantısı var.",
+          "proofs": [
+            {
+              "ref": "kutie-games",
+              "line": "Matching Numbers, Arrow Escape ve Cobite: oda kodunu paylaşın, arkadaşınızla canlı oynayın."
+            },
+            {
+              "ref": "mstodo",
+              "line": "Microsoft To Do'yu Claude Code ve Claude Desktop'a bağlar."
+            },
+            {
+              "ref": "taste-detector",
+              "line": "İlk arayüz düzenlemesinde Claude'u Emil Kowalski'nin animasyon rehberlerine yönlendirir."
+            }
+          ]
+        },
+        {
+          "id": "education",
+          "title": "Eğitimin dilinden anlarım.",
+          "body": "ODTÜ Bilgisayar ve Öğretim Teknolojileri Eğitimi mezunuyum. Python ve makine öğrenmesi dersleri verdim; bugün İMPARK'ta MEB ders kitapları ve öğretim programları üzerinde çalışan yapay zekâ sistemleri kuruyorum.",
+          "proofs": [
+            {
+              "ref": "impark-kc",
+              "line": "MEB 5. sınıf Matematik ve Fen Bilimleri içeriğinden çıkarılan 440'tan fazla bilgi bileşeni."
+            },
+            {
+              "ref": "thesis",
+              "line": "Teknik borcu hesaba katan, ajan tabanlı yapay zekâ destekli teknik yönetim süreçleri üzerine çalışıyorum."
+            },
+            {
+              "ref": "yzt-curricula",
+              "line": "Yapay zekâyı kendi başına öğrenmek isteyen herkes için, açık derslerden derlenmiş ücretsiz öğrenme yolları."
+            }
+          ]
+        }
+      ],
+      "specs": {
+        "title": "Teknik Özellikler",
+        "lead": "Görevler, diplomalar, beceriler ve diller: özgeçmiş, tek bakışta."
+      },
+      "contact": {
+        "title": "Tanışalım.",
+        "body": "Yeni fırsatlara açığım. E-posta ya da LinkedIn üzerinden yazabilirsiniz; açık kaynak projelerim GitHub'da."
+      },
+      "refs": {
+        "impark-qgen": "LGS/YKS Question Generator",
+        "impark-audit": "Ders kitabı denetim hattı",
+        "impark-kc": "Müfredat madenciliği hattı",
+        "thesis": "Y.L. araştırması, ODTÜ (devam ediyor)",
+        "ai-society": "ODTÜ Yapay Zekâ Topluluğu"
+      },
+      "refsNote": "İMPARK'ta"
     }
   },
   "site": {

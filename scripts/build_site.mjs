@@ -9,6 +9,7 @@
 //        src/site/style.css
 //        src/assets/cv/*.pdf    the no-phone CVs (made by scripts/make_web_cv.py)
 // Writes docs/index.html (English, follows the browser), docs/en/index.html, docs/tr/index.html,
+//        docs/{en,tr}/projects/<id>/index.html (one story page per project with a "story"),
 //        docs/assets/{site.js,site.css,THREE-LICENSE.txt}, docs/assets/cv/*.pdf, docs/.nojekyll
 //
 // Everything is built in memory and checked first; docs/ is only replaced when every check
@@ -24,12 +25,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "docs");
 const SITE = join(ROOT, "src", "site");
 
-const PAGES = [
-  // output path, language of the raw HTML, forced language, path on the site
-  { out: "index.html", lang: "en", force: "", path: "/" },
-  { out: "en/index.html", lang: "en", force: "en", path: "/en/" },
-  { out: "tr/index.html", lang: "tr", force: "tr", path: "/tr/" },
-];
+// The pages are listed after the content is read (one story page per project that has one).
 const OG_LOCALE = { en: "en_US", tr: "tr_TR" };
 
 /* ------------------------------------------------------------------ */
@@ -60,7 +56,9 @@ const JS_NUMERIC_CONSTANTS = new Set([
 const EMAIL = /[A-Za-z0-9._-]+@[A-Za-z0-9-]+\.[A-Za-z.]+/g;
 // Words that must never be served (private names and handles). The list itself is private, so
 // it lives in content/private/ (git-ignored) and is never committed to this public repo:
-// one word per line, matched case-insensitively anywhere in the text; "#" starts a comment.
+// one word per line, matched case-insensitively as a whole word ("#" starts a comment). Whole
+// words, with Unicode letters as the boundary, so Turkish words that merely contain the letters
+// (e.g. "paylaşın") do not trip it; full email addresses are caught separately below.
 const WORDS_FILE = join(ROOT, "content", "private", "guard-words.txt");
 const WORDS = loadWords(WORDS_FILE);
 
@@ -79,7 +77,7 @@ function loadWords(file) {
     process.exit(1);
   }
   const escRe = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(words.map(escRe).join("|"), "gi");
+  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${words.map(escRe).join("|")})(?![\\p{L}\\p{N}])`, "giu");
 }
 // A Turkish mobile number written with separators (a bare digit run is caught below).
 const PHONE_SPACED = /(?<![\d.])(?:\+?90|0)?[\s(]*5\d{2}[)\s.-]+\d{3}[\s.-]+\d{2}[\s.-]+\d{2}(?!\d)/g;
@@ -121,7 +119,20 @@ const shortHash = (buf) => createHash("sha256").update(buf).digest("hex").slice(
 
 const content = JSON.parse(readFileSync(join(ROOT, "content", "content.json"), "utf8"));
 const template = readFileSync(join(SITE, "page.html"), "utf8");
-const { renderSlots, renderPoster } = await import(pathToFileURL(join(SITE, "render.js")).href);
+const { renderHome, renderStory, storyIds, storyPath } = await import(pathToFileURL(join(SITE, "render.js")).href);
+
+// output path, page type, language of the raw HTML, forced language, path on the site, project
+const PAGES = [
+  { out: "index.html", page: "home", lang: "en", force: "", path: "/" },
+  { out: "en/index.html", page: "home", lang: "en", force: "en", path: "/en/" },
+  { out: "tr/index.html", page: "home", lang: "tr", force: "tr", path: "/tr/" },
+];
+for (const id of storyIds(content)) {
+  for (const lang of ["en", "tr"]) {
+    const path = storyPath(lang, id);
+    PAGES.push({ out: path.slice(1) + "index.html", page: "story", lang, force: lang, path, project: id });
+  }
+}
 
 const bundle = await build({
   entryPoints: [join(SITE, "main.js")],
@@ -141,6 +152,8 @@ files.set("assets/site.js", js);
 files.set("assets/site.css", css);
 files.set("assets/THREE-LICENSE.txt", readFileSync(join(ROOT, "node_modules", "three", "LICENSE")));
 files.set(".nojekyll", Buffer.alloc(0));
+const imgDir = join(ROOT, "src", "assets", "img");
+for (const f of readdirSync(imgDir).filter((f) => /\.(webp|png|jpg|svg)$/.test(f))) files.set(`assets/img/${f}`, readFileSync(join(imgDir, f)));
 const cvDir = join(ROOT, "src", "assets", "cv");
 const cvs = readdirSync(cvDir).filter((f) => f.endsWith(".pdf"));
 for (const f of cvs) files.set(`assets/cv/${f}`, readFileSync(join(cvDir, f)));
@@ -149,26 +162,39 @@ for (const lang of ["en", "tr"]) {
   if (!files.has(want)) throw new Error(`content.site.cv.${lang} points to ${want}, which is not in src/assets/cv/`);
 }
 
-const poster = renderPoster();
 for (const page of PAGES) {
   const t = content[page.lang];
   const other = page.lang === "en" ? "tr" : "en";
   const canonical = content.site.origin + page.path;
+  const story = page.page === "story" ? t.projects.find((p) => p.id === page.project) : null;
+  // the same page in each language
+  const alt = (lang) => (story ? storyPath(lang, page.project) : `/${lang}/`);
+  const alternates =
+    `<link rel="alternate" hreflang="en" href="${esc(content.site.origin + alt("en"))}">\n` +
+    `<link rel="alternate" hreflang="tr" href="${esc(content.site.origin + alt("tr"))}">\n` +
+    `<link rel="alternate" hreflang="x-default" href="${esc(content.site.origin + (story ? alt("en") : "/"))}">`;
+  const title = story ? `${story.name.replace(/\s*\(.*\)\s*$/, "")} — ${story.story.headline} · ${t.name}` : t.title;
+  const description = story ? story.story.claim : t.description;
   const values = {
     lang: page.lang,
     force: page.force,
-    title: esc(t.title),
-    description: esc(t.description),
+    page: page.page,
+    project: page.project || "",
+    title: esc(title),
+    description: esc(description),
     name: esc(t.name),
     canonical: esc(canonical),
-    origin: esc(content.site.origin),
+    alternates,
     og_locale: OG_LOCALE[page.lang],
     og_locale_alt: OG_LOCALE[other],
     toggle_label: esc(t.ui.toggle),
+    home_href: story ? `/${page.lang}/` : "#top",
+    en_href: alt("en"),
+    tr_href: alt("tr"),
     en_pressed: String(page.lang === "en"),
     tr_pressed: String(page.lang === "tr"),
-    en_current: page.force === "en" ? ' aria-current="page"' : "",
-    tr_current: page.force === "tr" ? ' aria-current="page"' : "",
+    en_current: page.lang === "en" && page.force ? ' aria-current="page"' : "",
+    tr_current: page.lang === "tr" && page.force ? ' aria-current="page"' : "",
     css_version: shortHash(css),
     js_version: shortHash(js),
   };
@@ -176,7 +202,7 @@ for (const page of PAGES) {
     if (!(key in values)) throw new Error(`page.html: unknown placeholder ${all}`);
     return values[key];
   });
-  const slots = { ...renderSlots(content, page.lang), poster };
+  const slots = story ? renderStory(content, page.lang, page.project) : renderHome(content, page.lang);
   for (const [name, value] of Object.entries(slots)) {
     const re = new RegExp(`<!--@${name}-->[\\s\\S]*?<!--/@${name}-->`);
     if (!re.test(html)) throw new Error(`page.html: slot marker missing: ${name}`);

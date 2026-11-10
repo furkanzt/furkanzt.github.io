@@ -5,8 +5,12 @@
 // WebGL works, motion is allowed and Save-Data is off; the static drawing stays otherwise.
 import { WebGLRenderer, Vector3 } from "three";
 import { createTdd } from "./vignettes/tdd.js";
+import { createStars } from "./vignettes/stars.js";
 
-const FACTORIES = { tdd: createTdd };
+const FACTORIES = { tdd: createTdd, stars: createStars };
+// Two kinds of host: a card illustration (.pv, its drawing in .pv-stage) and the hero's
+// constellation (.cn-stage, the drawing itself). Still drawings of single steps are not hosts.
+const HOSTS = ".pv[data-art]:not(.pv--step), .cn-stage[data-art]";
 
 export function createCards() {
   // The WebGL context is made when the first illustration comes into view, not at page load.
@@ -83,7 +87,11 @@ export function createCards() {
     const inst = e.inst;
     inst.camera.aspect = w / h;
     inst.camera.updateProjectionMatrix();
-    inst.update(dt, time, { w, h, dpr, pointer: e.pointer });
+    // where the host is on screen (-1 above .. 0 centred .. 1 below), for scroll-linked motion
+    const r = stage.getBoundingClientRect();
+    const vh = window.innerHeight || 1;
+    const scroll = Math.max(-1.5, Math.min(1.5, (r.top + r.height / 2 - vh / 2) / vh));
+    inst.update(dt, time, { w, h, dpr, pointer: e.pointer, scroll });
     renderer.setViewport(0, 0, w, h);
     renderer.setScissor(0, 0, w, h);
     renderer.clear();
@@ -125,14 +133,16 @@ export function createCards() {
 
   /** Attach to every illustration under `root` (again after a language swap re-renders them). */
   function mount(root) {
-    for (const pv of root.querySelectorAll(".pv[data-art]")) {
+    for (const pv of root.querySelectorAll(HOSTS)) {
       const kind = pv.getAttribute("data-art");
       if (!FACTORIES[kind] || entries.some((e) => e.pv === pv)) continue;
-      const stage = pv.querySelector(".pv-stage");
+      // hidden layouts (the constellation has a wide and a tall one) are skipped until shown
+      if (pv.offsetParent === null && getComputedStyle(pv).position !== "fixed") continue;
+      const stage = pv.querySelector(".pv-stage") || pv;
       const canvas = document.createElement("canvas");
-      canvas.className = "pv-canvas";
+      canvas.className = stage === pv ? "cn-canvas" : "pv-canvas";
       canvas.setAttribute("aria-hidden", "true");
-      stage.insertBefore(canvas, stage.querySelector(".pv-labels"));
+      stage.insertBefore(canvas, stage.querySelector(".pv-labels, .cn-links"));
       const labels = [...pv.querySelectorAll(".pv-label[data-anchor]")].map((el) => ({ el, key: el.dataset.anchor, x: -1, y: -1, left: el.style.left, top: el.style.top }));
       const e = {
         pv,

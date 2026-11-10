@@ -1,90 +1,13 @@
 // Pure rendering for furkanzt.github.io. No DOM, no three.js: the build (Node) bakes this
 // output into the static pages, and the browser calls the same functions when the language
-// toggle swaps the text in place, so the raw HTML and the toggled page cannot drift apart.
-
-import { ART, renderArtPoster, artSteps } from "./card-art.js";
-
-/* ------------------------------------------------------------------ */
-/* Shared layout of the figure, in normalised stage coordinates (0..1). */
-/* The static poster, the 3D scene and the tier buttons all read this.  */
-/* ------------------------------------------------------------------ */
-export const LAYOUT = {
-  aspect: 4 / 3,
-  src: { x: 0.035, y0: 0.12, y1: 0.88 },
-  router: { x: 0.38, y: 0.5 },
-  tiers: [
-    { id: "haiku", x: 0.7, y: 0.2 },
-    { id: "sonnet", x: 0.7, y: 0.5 },
-    { id: "opus", x: 0.7, y: 0.8 },
-  ],
-};
-
-// Task kinds and their tier, from the claude-agenting routing table (skills/agenting/SKILL.md).
-// Order matters only for picking a kind at random in the scene; no frequencies are claimed.
-export const KINDS = ["haiku", "sonnet", "haiku", "sonnet", "opus", "sonnet"];
-
-// Text for the figure. Tier names and effort values are the plugin's own identifiers, so
-// they stay the same in both languages.
-export const VIZ = {
-  en: {
-    tasks: "tasks",
-    router: "router",
-    caption: "Illustrative. Each task passes a router and goes to the cheapest model tier that does the job, as claude-agenting routes subagents.",
-    hint: "Select a tier to see what it is used for.",
-    link: "claude-agenting on GitHub",
-    tiers: {
-      haiku: {
-        desc: "cheap and fast",
-        jobs: [
-          ["Listing and counting files", "medium"],
-          ["Reading code or prose and reporting what it does", "medium"],
-        ],
-      },
-      sonnet: {
-        desc: "balanced",
-        jobs: [
-          ["Mechanical text cleanup", "low"],
-          ["Turning prose into rules; classifying", "medium–high"],
-          ["Adversarial verification", "high"],
-        ],
-      },
-      opus: {
-        desc: "deep reasoning",
-        jobs: [["Synthesizing across a whole document", "xhigh"]],
-      },
-    },
-  },
-  tr: {
-    tasks: "görevler",
-    router: "yönlendirici",
-    caption: "Temsilî. Her görev bir yönlendiriciden geçer ve işi yapabilen en ucuz model katmanına gider; claude-agenting alt ajanları böyle yönlendirir.",
-    hint: "Ne için kullanıldığını görmek için bir katman seçin.",
-    link: "GitHub'da claude-agenting",
-    tiers: {
-      haiku: {
-        desc: "ucuz ve hızlı",
-        jobs: [
-          ["Dosyaları listeleme ve sayma", "medium"],
-          ["Kodu ya da metni okuyup ne yaptığını raporlama", "medium"],
-        ],
-      },
-      sonnet: {
-        desc: "dengeli",
-        jobs: [
-          ["Mekanik metin temizliği", "low"],
-          ["Düz metni kurallara dönüştürme; sınıflandırma", "medium–high"],
-          ["Çekişmeli doğrulama", "high"],
-        ],
-      },
-      opus: {
-        desc: "derin akıl yürütme",
-        jobs: [["Bütün bir belge boyunca sentez", "xhigh"]],
-      },
-    },
-  },
-};
-
-const AGENTING_URL = "https://github.com/furkanzt/claude-agenting";
+// toggle swaps the home page's text in place, so the raw HTML and the toggled page cannot
+// drift apart.
+//
+// Two kinds of page:
+//   home   /, /en/, /tr/                 an Apple-style pitch: overview, four chapters, specs, contact
+//   story  /en/projects/<id>/, /tr/...   one project told in steps as you scroll
+import { ART, renderArtPoster, artSteps, artFocus } from "./card-art.js";
+import { CONSTELLATION, renderConstellationPoster } from "./constellation.js";
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
@@ -94,25 +17,24 @@ export const esc = (s) =>
 
 const ARROW =
   '<svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4.5 11.5 11 5M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
+const NEXT =
+  '<svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M3 8h9.5M8.75 4.25 12.5 8l-3.75 3.75" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
+const BACK =
+  '<svg class="ic ic--back" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M13 8H3.5M7.25 4.25 3.5 8l3.75 3.75" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
 const DOWN =
   '<svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 2.5v8M4.75 7.5 8 10.75l3.25-3.25M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
+const CHEVRON =
+  '<svg class="ic chev" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 6.25 8 10.25l4-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
 
 const hostOf = (url) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-const repoOf = (url) => url.replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
-const fileOf = (path) => path.slice(path.lastIndexOf("/") + 1);
-// A long file name may break after its first underscore only, and the icon stays with the
-// last word ("MustafaFurkanOzates_" / "CV_EN.pdf ↓" on a 320 px screen).
-function fileLabel(name, icon) {
-  const i = name.indexOf("_");
-  if (i < 0) return `<span class="nowrap">${esc(name)}${icon}</span>`;
-  return `${esc(name.slice(0, i + 1))}<wbr><span class="nowrap">${esc(name.slice(i + 1))}${icon}</span>`;
-}
 const pct = (v) => +(v * 100).toFixed(2) + "%";
+
+// Code-like text (file paths, test ids) may wrap after ::, / and _, never inside a word.
+const breakable = (s) => esc(s).replace(/(::|\/|_)/g, "$1<wbr>");
 
 /** The no-JavaScript form of an address: readable, but not a harvestable string. */
 export const spelledEmail = (e) => `${e.user} [at] ${e.domain}`;
 
-// Split "Label: rest" once (headline, skills). Text is kept exactly; only markup is added.
 function splitOnce(text, sep) {
   const i = text.indexOf(sep);
   return i < 0 ? [null, text] : [text.slice(0, i), text.slice(i + sep.length)];
@@ -135,98 +57,248 @@ function splitList(text) {
   return out;
 }
 
-/* ------------------------------------------------------------------ */
-/* Slots                                                                */
-/* ------------------------------------------------------------------ */
-const SECTION_IDS = ["experience", "projects", "research", "education", "skills", "contact"];
+export const storyPath = (lang, id) => `/${lang}/projects/${id}/`;
+const projectById = (t, id) => t.projects.find((p) => p.id === id);
+// Short display names for the constellation and the proof tiles.
+const shortName = (p) => p.name.replace(/\s*\(.*\)\s*$/, "");
 
-function renderNav(t) {
-  return SECTION_IDS.map((id) => `<a href="#${id}">${esc(t.ui[id])}</a>`).join("");
+/** Where a project leads: its story page when it has one, else its repo, else its first live link. */
+function projectHref(lang, p) {
+  if (p.story) return storyPath(lang, p.id);
+  if (p.url) return p.url;
+  return p.links && p.links[0] ? p.links[0].url : "#work";
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared chrome                                                        */
+/* ------------------------------------------------------------------ */
+function renderNav(t, base) {
+  return ["work", "specs", "contact"].map((id) => `<a href="${base}#${id}">${esc(t.ui[id])}</a>`).join("");
+}
+
+function renderFooter(t) {
+  return `<p>${esc(t.name)}</p><p>${esc(t.location)}</p>`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Home                                                                 */
+/* ------------------------------------------------------------------ */
+function renderConstellation(t, lang) {
+  const nodeLinks = (kind) =>
+    Object.entries(CONSTELLATION[kind].nodes)
+      .map(([id, n]) => {
+        const p = projectById(t, id);
+        if (!p) throw new Error(`constellation: no project "${id}"`);
+        return (
+          `<a class="cn-node cn-node--${n.side}" data-node="${id}" href="${esc(projectHref(lang, p))}" style="left:${pct(n.x)};top:${pct(n.y)}">` +
+          `<span class="cn-dot" aria-hidden="true"></span><span class="cn-name">${esc(shortName(p).replace(/^claude-/, ""))}</span></a>`
+        );
+      })
+      .join("");
+  // Both layouts are in the markup; CSS shows the one that fits the screen (no script needed).
+  return (
+    `<figure class="cn">` +
+    ["wide", "tall"]
+      .map(
+        (kind) =>
+          `<div class="cn-stage cn-stage--${kind}" data-layout="${kind}" data-art="stars">${renderConstellationPoster(kind)}` +
+          `<nav class="cn-links" aria-label="${esc(t.home.constellation.label)}">${nodeLinks(kind)}</nav></div>`
+      )
+      .join("") +
+    `<figcaption class="cn-cap">${esc(t.home.constellation.label)}<span class="cn-hint"> · ${esc(t.home.constellation.hint)}</span></figcaption>` +
+    `</figure>`
+  );
+}
+
+function renderLead(text) {
+  const [lead, rest] = splitOnce(text, ": ");
+  return lead ? `<strong>${esc(lead)}:</strong> ${esc(rest)}` : esc(rest);
 }
 
 function renderHero(t, site, lang) {
-  const [lead, rest] = splitOnce(t.headline, ": ");
-  const headline = lead ? `<strong>${esc(lead)}:</strong> ${esc(rest)}` : esc(rest);
   return (
-    `<h1 class="name">${esc(t.name)}</h1>` +
-    `<p class="headline">${headline}</p>` +
+    `<section class="ov" id="overview" aria-labelledby="ov-name"><div class="wrap ov-inner">` +
+    `<img class="ov-photo" src="/assets/img/headshot.webp" width="96" height="96" alt="" decoding="async">` +
+    `<h1 class="ov-name" id="ov-name">${esc(t.name)}</h1>` +
+    `<p class="ov-headline">${esc(t.home.hero.headline)}</p>` +
+    `<p class="ov-sub">${renderLead(t.headline)}</p>` +
     `<p class="avail"><span class="avail-dot" aria-hidden="true"></span>${esc(t.availability)}</p>` +
     `<div class="actions">` +
     `<a class="btn btn--primary" data-email="0" href="#contact">${esc(t.ui.email)}</a>` +
-    `<a class="btn" href="${esc(site.linkedin)}">LinkedIn</a>` +
-    `<a class="btn" href="${esc(site.github)}">GitHub</a>` +
     `<a class="btn" href="${esc(site.cv[lang])}" type="application/pdf" hreflang="${lang}">${esc(t.ui.cv)}</a>` +
-    `</div>`
+    `</div>` +
+    `<p class="ov-links"><a href="${esc(site.linkedin)}">LinkedIn${ARROW}</a><a href="${esc(site.github)}">GitHub${ARROW}</a></p>` +
+    `</div>` +
+    `<div class="wrap">${renderConstellation(t, lang)}</div>` +
+    `</section>`
   );
 }
 
-function renderStageText(lang) {
-  const v = VIZ[lang];
-  const r = LAYOUT.router;
-  let html =
-    `<span class="vz-label vz-label--tasks" style="left:${pct(LAYOUT.src.x)};top:4.5%">${esc(v.tasks)}</span>` +
-    `<span class="vz-label vz-label--router" style="left:${pct(r.x)};top:${pct(r.y + 0.085)}">${esc(v.router)}</span>`;
-  for (const tier of LAYOUT.tiers) {
-    html +=
-      `<button type="button" class="tier" data-tier="${tier.id}" aria-expanded="false" aria-controls="vz-pin" style="left:${pct(tier.x)};top:${pct(tier.y)}">` +
-      `<span class="tier-hit" aria-hidden="true"></span>` +
-      `<span class="tier-text"><span class="tier-name">${tier.id}</span><span class="tier-desc">${esc(v.tiers[tier.id].desc)}</span></span>` +
-      `</button>`;
+// A proof under a chapter: a project (links to its story page, repo or game) or work at İMPARK
+// (no public link, named as the CV names it).
+function renderProof(t, lang, pr, chId) {
+  const p = projectById(t, pr.ref);
+  if (p && !p.story && !p.url && p.links && p.links.length > 1) {
+    // every game is one tap away; the network caveat sits with them, once, in the "open" chapter
+    const plays = p.links.map((l) => `<a href="${esc(l.url)}">${esc(l.label)}${ARROW}</a>`).join("");
+    return (
+      `<li class="pf pf--multi"><div class="pf-link"><span class="pf-name">${esc(shortName(p))}</span>` +
+      `<span class="pf-line">${esc(pr.line)}</span><span class="pf-plays">${plays}</span>` +
+      (chId === "ships" ? `<span class="pf-note">${esc(t.ui.gamesNote)}</span>` : "") +
+      `</div></li>`
+    );
   }
-  return html;
+  if (p) {
+    const go = p.story ? `${esc(t.ui.seeHow)}${NEXT}` : `${esc(p.cta || (p.url ? "GitHub" : t.ui.playIt))}${ARROW}`;
+    return (
+      `<li class="pf"><a class="pf-link" href="${esc(projectHref(lang, p))}">` +
+      `<span class="pf-name">${esc(shortName(p))}</span>` +
+      `<span class="pf-line">${esc(pr.line)}</span>` +
+      `<span class="pf-go">${go}</span></a></li>`
+    );
+  }
+  const label = t.home.refs[pr.ref];
+  if (!label) throw new Error(`chapter proof: unknown ref "${pr.ref}"`);
+  const at = pr.ref.startsWith("impark-") ? ` <span class="pf-at">${esc(t.home.refsNote)}</span>` : "";
+  const internal = pr.ref.startsWith("impark-") ? `<span class="pf-go pf-go--muted">${esc(t.ui.internal)}</span>` : "";
+  return `<li class="pf pf--plain"><div class="pf-link"><span class="pf-name">${esc(label)}${at}</span><span class="pf-line">${esc(pr.line)}</span>${internal}</div></li>`;
 }
 
-function renderCaption(lang) {
-  const v = VIZ[lang];
+// The illustration a chapter may carry, only where it explains something: the tests chapter
+// shows scenarios tied to tests.
+const CHAPTER_ART = { tests: "tdd" };
+
+function renderChapter(t, lang, ch, i) {
+  const art = CHAPTER_ART[ch.id];
+  const artProj = art && t.projects.find((p) => p.art && p.art.kind === art);
+  const figure = artProj ? `<div class="chap-fig">${renderArtFigure(artProj, "pv--chapter")}</div>` : "";
   return (
-    `<span class="cap-text">${esc(v.caption)} <span class="cap-hint">${esc(v.hint)}</span></span>` +
-    `<a class="cap-link" href="${AGENTING_URL}">${esc(v.link)}${ARROW}</a>`
-  );
-}
-
-/** The pinned label for one tier (shown only after a tier is selected, so never in the raw HTML). */
-export function renderPin(lang, tierId) {
-  const v = VIZ[lang];
-  const tier = v.tiers[tierId];
-  const jobs = tier.jobs
-    .map(([job, effort]) => `<li><span class="pin-job">${esc(job)}</span><code class="pin-effort">effort: ${esc(effort)}</code></li>`)
-    .join("");
-  return `<p class="pin-head"><code class="pin-tier">${tierId}</code><span>${esc(tier.desc)}</span></p><ul class="pin-jobs">${jobs}</ul>`;
-}
-
-// One employer: the latest role is the heading; earlier roles at the same employer follow as
-// quieter lines. Every employer after the first is set as a lighter, secondary entry (CSS).
-function renderJob(job, i) {
-  const [latest, ...earlier] = job.roles;
-  const line = (role, tag, cls) =>
-    `<div class="job-line${cls}"><${tag} class="job-role">${esc(role.title)}</${tag}><p class="dates">${esc(role.dates)}</p></div>`;
-  return (
-    `<article class="job${i ? " job--earlier" : ""}"><header class="job-head">` +
-    line(latest, "h3", "") +
-    earlier.map((role) => line(role, "p", " job-line--prev")).join("") +
-    `<p class="job-org">${esc(job.org)}<span class="sep" aria-hidden="true"></span>${esc(job.location)}</p>` +
-    `</header><ul class="bullets">${job.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul></article>`
-  );
-}
-
-function renderExperience(t) {
-  return (
-    `<section class="sec" id="experience" aria-labelledby="h-experience"><h2 id="h-experience">${esc(t.ui.experience)}</h2><div class="sec-body">` +
-    `<div class="jobs">${t.experience.map(renderJob).join("")}</div>` +
+    `<section class="chap chap--${esc(ch.id)}${figure ? " chap--art" : ""}" id="${i === 0 ? "work" : "ch-" + esc(ch.id)}" aria-labelledby="h-${esc(ch.id)}">` +
+    `<div class="wrap chap-inner">` +
+    `<div class="chap-copy"><h2 class="chap-title rv" id="h-${esc(ch.id)}">${esc(ch.title)}</h2>` +
+    `<p class="chap-body rv">${esc(ch.body)}</p></div>` +
+    figure +
+    `<ul class="pfs">${ch.proofs.map((pr) => renderProof(t, lang, pr, ch.id)).join("")}</ul>` +
     `</div></section>`
   );
 }
 
-const CHEVRON =
-  '<svg class="ic xp-chev" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 6.25 8 10.25l4-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
+// Tech Specs: the CV as a spec sheet. Each row is a label and a short value; the full CV text
+// sits behind one "Full details" per job (a plain <details>, so it opens without JavaScript).
+function renderSpecs(t) {
+  const ui = t.ui;
+  const job = (j) => {
+    const roles = j.roles
+      .map((r) => `<p class="sp-line"><span class="sp-strong">${esc(r.title)}</span><span class="sp-dates">${esc(r.dates)}</span></p>`)
+      .join("");
+    return (
+      `<div class="sp-job"><p class="sp-org sp-org--first">${esc(j.org)} · ${esc(j.location)}</p>${roles}` +
+      `<p class="sp-hl">${esc(j.highlight)}</p>` +
+      `<details class="sp-more"><summary><span>${esc(ui.fullDetails)}</span>${CHEVRON}</summary>` +
+      `<ul class="bullets">${j.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul></details></div>`
+    );
+  };
+  const [now, ...before] = t.experience;
+  const ed = t.education;
+  const degrees = ed.degrees
+    .map(
+      (d) =>
+        `<p class="sp-line"><span class="sp-strong">${esc(d.title)}</span><span class="sp-dates">${esc(d.dates)}</span></p>` +
+        (d.thesis ? `<p class="sp-note">${esc(d.thesis)}</p>` : "")
+    )
+    .join("");
+  const research = t.research
+    .map((r) => {
+      const [lead, rest] = splitOnce(r.title, " — ");
+      const note = [rest, r.people].filter(Boolean).join(" · ");
+      return (
+        `<p class="sp-line"><span class="sp-strong">${esc(lead || r.title)}</span><span class="sp-dates">${esc(r.dates)}</span></p>` +
+        (note ? `<p class="sp-note">${esc(note)}</p>` : "")
+      );
+    })
+    .join("");
+  const [, tech] = splitOnce(t.skills[0], ": ");
+  const [, langs] = splitOnce(t.skills[1], ": ");
+  const row = (label, body) => `<div class="sp-row"><dt>${esc(label)}</dt><dd>${body}</dd></div>`;
+  return (
+    `<section class="specs" id="specs" aria-labelledby="h-specs"><div class="wrap">` +
+    `<h2 class="specs-title rv" id="h-specs">${esc(t.home.specs.title)}</h2>` +
+    `<p class="specs-lead rv">${esc(t.home.specs.lead)}</p>` +
+    `<dl class="sp">` +
+    row(ui.now, job(now)) +
+    row(ui.before, before.map(job).join("")) +
+    row(ui.education, `<p class="sp-org sp-org--first">${esc(ed.org)} · ${esc(ed.location)}</p>${degrees}`) +
+    row(ui.research, research) +
+    row(ui.skills, renderSkills(splitList(tech), ui.skillGroups)) +
+    row(ui.languages, `<p class="sp-plain">${esc(langs)}</p>`) +
+    `</dl></div></section>`
+  );
+}
 
-/** "{n} steps" style strings from content.json. */
-const fill = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (all, k) => (k in vars ? String(vars[k]) : all));
+// The CV's one long skills line, in three labelled groups (same order in both languages).
+const SKILL_GROUPS = [
+  [0, 6], // languages and frameworks
+  [6, 9], // cloud and tooling
+  [9, 13], // AI
+];
+function renderSkills(items, labels) {
+  if (items.length !== 13) throw new Error(`skills: expected 13 items to group, got ${items.length}; update SKILL_GROUPS`);
+  return SKILL_GROUPS.map(
+    ([a, b], i) => `<p class="sp-skill"><span class="sp-strong">${esc(labels[i])}</span> ${esc(items.slice(a, b).join(", "))}</p>`
+  ).join("");
+}
 
-// The illustration of one card: the static drawing plus its text labels (positioned from the
-// shared layout). aria-hidden: everything it shows is also said in the explainer text.
-function renderArt(p) {
-  if (!p.art) return "";
+// The quiet row of other ways in, under the big Email button.
+function renderBuyLinks(t, site, lang) {
+  return (
+    `<ul class="buy-links">` +
+    `<li><a href="${esc(site.linkedin)}">LinkedIn${ARROW}</a></li>` +
+    `<li><a href="${esc(site.github)}">GitHub${ARROW}</a></li>` +
+    `<li><a href="${esc(site.cv[lang])}" type="application/pdf" hreflang="${lang}">${esc(t.ui.cv)}${DOWN}</a></li>` +
+    `</ul>`
+  );
+}
+
+function renderContact(t, site, lang) {
+  // One button, the address written out under it (some readers have no mail app), then a
+  // quiet row of the other ways in. Without JavaScript the addresses show spelled out and are
+  // not links; the script assembles them (the full address never appears in the served files).
+  const [main, uni] = site.emails;
+  return (
+    `<section class="buy" id="contact" aria-labelledby="h-contact"><div class="wrap">` +
+    `<h2 class="buy-title rv" id="h-contact">${esc(t.home.contact.title)}</h2>` +
+    `<p class="buy-body rv">${esc(t.home.contact.body)}</p>` +
+    `<p class="buy-cta"><a class="btn btn--primary btn--big" data-email="0" href="#contact-mail">${esc(t.ui.email)}</a></p>` +
+    `<p class="buy-mail" id="contact-mail"><a class="c-link" data-email="0">${esc(spelledEmail(main))}</a>` +
+    (uni ? `<span class="buy-uni">${esc(t.ui.emailUni)}: <a class="c-link" data-email="1">${esc(spelledEmail(uni))}</a></span>` : "") +
+    `</p>` +
+    renderBuyLinks(t, site, lang) +
+    `</div></section>`
+  );
+}
+
+/** The home page's language-dependent slots. */
+export function renderHome(content, lang) {
+  const t = content[lang];
+  const site = content.site;
+  return {
+    nav: renderNav(t, ""),
+    main:
+      renderHero(t, site, lang) +
+      t.home.chapters.map((ch, i) => renderChapter(t, lang, ch, i)).join("") +
+      renderSpecs(t) +
+      renderContact(t, site, lang),
+    footer: renderFooter(t),
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Card illustrations                                                   */
+/* ------------------------------------------------------------------ */
+// One illustration with its text labels (positioned from the shared layout). aria-hidden:
+// everything it shows is also said in the text around it. `focus` fixes a step's focus in the
+// static drawing (the per-step drawings shown without JavaScript).
+function renderArtFigure(p, cls = "", focus = null) {
   const layout = ART[p.art.kind];
   const labels = Object.entries(p.art.labels || {})
     .map(([key, text]) => {
@@ -235,273 +307,93 @@ function renderArt(p) {
       return `<span class="pv-label pv-label--${key}" data-anchor="${key}" style="left:${pct(a.x)};top:${pct(a.y)}">${esc(text)}</span>`;
     })
     .join("");
+  const f = focus ? ` data-focus="${focus.join(" ")}"` : "";
   return (
-    `<figure class="pv" data-art="${esc(p.art.kind)}" aria-hidden="true">` +
+    `<figure class="pv ${cls}" data-art="${esc(p.art.kind)}"${f} aria-hidden="true">` +
     `<div class="pv-stage">${renderArtPoster(p.art.kind)}<div class="pv-labels">${labels}</div></div>` +
     `</figure>`
   );
 }
 
-// The layered explainer: a plain <details>, so it opens without JavaScript and the whole text
-// is in the raw HTML. The script adds the step navigation and syncs the illustration.
-function renderExplain(p, ui) {
-  const x = p.explain;
-  if (!x) return "";
-  if (p.art && artSteps(p.art.kind) !== x.steps.length) {
-    throw new Error(`${p.id}: ${x.steps.length} steps in content.json, the ${p.art.kind} illustration has ${artSteps(p.art.kind)}`);
-  }
-  const steps = x.steps
-    .map(
-      (st, k) =>
-        `<li class="xp-step" data-step="${k}"><span class="xp-n" aria-hidden="true">${k + 1}</span>` +
-        `<div class="xp-st"><p class="xp-st-t">${esc(st.title)}</p><p class="xp-st-x">${esc(st.text)}</p></div></li>`
-    )
-    .join("");
-  const facts = (x.deeper || []).map((d) => `<li>${esc(d)}</li>`).join("");
-  const links = (x.links || [])
-    .map((l) => `<li><a href="${esc(l.url)}">${esc(l.label)}${ARROW}</a></li>`)
-    .join("");
-  const deeper = facts
-    ? `<details class="xp-deep"><summary class="xp-deep-sum"><span>${esc(ui.goDeeper)}</span>${CHEVRON}</summary>` +
-      `<div class="xp-deep-body"><ul class="xp-facts">${facts}</ul>${links ? `<ul class="xp-links">${links}</ul>` : ""}</div></details>`
-    : "";
-  return (
-    `<details class="xp" id="xp-${esc(p.id)}">` +
-    `<summary class="xp-sum"><span class="xp-sum-t">${esc(ui.howItWorks)}</span><span class="xp-sum-n">${esc(fill(ui.stepsCount, { n: x.steps.length }))}</span>${CHEVRON}</summary>` +
-    `<div class="xp-body">` +
-    (x.lead ? `<p class="xp-lead">${esc(x.lead)}</p>` : "") +
-    `<ol class="xp-steps">${steps}</ol>` +
-    `<div class="xp-nav" hidden><button type="button" class="xp-btn" data-dir="-1">${esc(ui.back)}</button>` +
-    `<p class="xp-count" aria-live="polite" data-tpl="${esc(ui.stepOf)}"></p>` +
-    `<button type="button" class="xp-btn xp-btn--next" data-dir="1">${esc(ui.next)}</button></div>` +
-    deeper +
-    `</div></details>`
-  );
-}
-
-function renderProject(p, i, ui) {
-  let foot = "";
-  if (p.url) {
-    foot = `<p class="proj-link"><a href="${esc(p.url)}">${esc(ui.viewOnGitHub)}${ARROW}</a><code class="repo">${esc(repoOf(p.url))}</code></p>`;
-  }
-  let plays = "";
-  if (p.links && p.links.length) {
-    plays =
-      `<ul class="plays">` +
-      p.links
-        .map(
-          (l) =>
-            `<li><a href="${esc(l.url)}"><span class="play-verb">${esc(ui.playNow)}</span><span class="play-name">${esc(l.label)}</span><code class="play-host">${esc(hostOf(l.url))}</code>${ARROW}</a></li>`
-        )
-        .join("") +
-      `</ul><p class="note">${esc(ui.gamesNote)}</p>`;
-  }
-  const art = renderArt(p);
-  return (
-    `<article class="proj${art ? " proj--art" : ""}"${p.id ? ` id="p-${esc(p.id)}" data-proj="${esc(p.id)}"` : ""}>` +
-    art +
-    `<div class="proj-body">` +
-    `<div class="proj-id"><h3 class="proj-name">${esc(p.name)}</h3><p class="proj-tech">${esc(p.tech)}</p></div>` +
-    `<div class="proj-main"><p class="proj-text">${esc(p.text)}</p>${plays}${foot}</div>` +
-    renderExplain(p, ui) +
-    `</div></article>`
-  );
-}
-
-function renderProjects(t) {
-  return (
-    `<section class="sec" id="projects" aria-labelledby="h-projects"><h2 id="h-projects">${esc(t.ui.projects)}</h2><div class="sec-body">` +
-    `<div class="projects">${t.projects.map((p, i) => renderProject(p, i, t.ui)).join("")}</div>` +
-    `</div></section>`
-  );
-}
-
-function renderTitle(title) {
-  const [lead, rest] = splitOnce(title, " — ");
-  return lead ? `<strong>${esc(lead)}</strong> — ${esc(rest)}` : esc(title);
-}
-
-function renderResearch(t) {
-  const rows = t.research
-    .map(
-      (r) =>
-        `<li class="row"><p class="row-title">${renderTitle(r.title)}</p><p class="dates">${esc(r.dates)}</p>` +
-        (r.people ? `<p class="row-meta">${esc(r.people)}</p>` : "") +
-        `</li>`
-    )
-    .join("");
-  return `<section class="sec" id="research" aria-labelledby="h-research"><h2 id="h-research">${esc(t.ui.research)}</h2><div class="sec-body"><ul class="rows">${rows}</ul></div></section>`;
-}
-
-function renderEducation(t) {
-  const ed = t.education;
-  const rows = ed.degrees
-    .map(
-      (d) =>
-        `<li class="row"><p class="row-title">${esc(d.title)}</p><p class="dates">${esc(d.dates)}</p>` +
-        (d.thesis ? `<p class="row-meta">${esc(d.thesis)}</p>` : "") +
-        `</li>`
-    )
-    .join("");
-  return (
-    `<section class="sec" id="education" aria-labelledby="h-education"><h2 id="h-education">${esc(t.ui.education)}</h2><div class="sec-body">` +
-    `<p class="edu-org"><strong>${esc(ed.org)}</strong><span class="sep" aria-hidden="true"></span>${esc(ed.location)}</p>` +
-    `<ul class="rows">${rows}</ul></div></section>`
-  );
-}
-
-function renderSkills(t) {
-  const rows = t.skills
-    .map((s) => {
-      const [label, rest] = splitOnce(s, ": ");
-      const items = splitList(rest)
-        .map((x) => `<li>${esc(x)}</li>`)
-        .join("");
-      return `<div class="skill"><dt>${esc(label || "")}</dt><dd><ul class="inline-list">${items}</ul></dd></div>`;
-    })
-    .join("");
-  return `<section class="sec" id="skills" aria-labelledby="h-skills"><h2 id="h-skills">${esc(t.ui.skills)}</h2><div class="sec-body"><dl class="skills">${rows}</dl></div></section>`;
-}
-
-function renderContact(t, site, lang) {
-  const labels = [t.ui.email, t.ui.emailUni];
-  // Without JavaScript the address shows spelled out and is not a link; the script turns
-  // each one into a mailto link (the full address never appears in the served files).
-  const emails = site.emails
-    .map(
-      (e, i) =>
-        `<li class="c-row"><span class="c-label">${esc(labels[i] || t.ui.email)}</span><a class="c-link" data-email="${i}">${esc(spelledEmail(e))}</a></li>`
-    )
-    .join("");
-  return (
-    `<section class="sec sec--contact" id="contact" aria-labelledby="h-contact"><h2 id="h-contact">${esc(t.ui.contact)}</h2><div class="sec-body">` +
-    `<ul class="contact">${emails}` +
-    `<li class="c-row"><span class="c-label">LinkedIn</span><a class="c-link" href="${esc(site.linkedin)}">${esc(hostOf(site.linkedin).replace(/^www\./, ""))}${ARROW}</a></li>` +
-    `<li class="c-row"><span class="c-label">GitHub</span><a class="c-link" href="${esc(site.github)}">${esc(hostOf(site.github))}${ARROW}</a></li>` +
-    `<li class="c-row"><span class="c-label">${esc(t.ui.cv)}</span><a class="c-link" href="${esc(site.cv[lang])}" type="application/pdf" hreflang="${lang}">${fileLabel(fileOf(site.cv[lang]), DOWN)}</a></li>` +
-    `</ul><p class="c-loc">${esc(t.location)}</p></div></section>`
-  );
-}
-
-function renderFooter(t) {
-  return `<p>${esc(t.name)}</p><p>${esc(t.location)}</p>`;
-}
-
-/** Every language-dependent slot of the page body, keyed by its data-slot name. */
-export function renderSlots(content, lang) {
+/* ------------------------------------------------------------------ */
+/* Story page                                                           */
+/* ------------------------------------------------------------------ */
+/** A project's story page: a short pitch, the steps told as you scroll, then what's under the hood. */
+export function renderStory(content, lang, id) {
   const t = content[lang];
-  const site = content.site;
-  return {
-    nav: renderNav(t),
-    hero: renderHero(t, site, lang),
-    stage: renderStageText(lang),
-    caption: renderCaption(lang),
-    sections:
-      renderExperience(t) +
-      renderProjects(t) +
-      renderResearch(t) +
-      renderEducation(t) +
-      renderSkills(t) +
-      renderContact(t, site, lang),
-    footer: renderFooter(t),
-  };
+  const ui = t.ui;
+  const p = projectById(t, id);
+  if (!p || !p.story) throw new Error(`no story for project ${id}`);
+  const st = p.story;
+  if (p.art && artSteps(p.art.kind) !== st.steps.length) {
+    throw new Error(`${id}: ${st.steps.length} steps in content.json, the ${p.art.kind} illustration has ${artSteps(p.art.kind)}`);
+  }
+  const home = `/${lang}/`;
+  const actions = [];
+  if (p.url) actions.push(`<a class="btn btn--primary" href="${esc(p.url)}">${esc(ui.viewOnGitHub)}${ARROW}</a>`);
+  for (const l of p.links || []) actions.push(`<a class="btn" href="${esc(l.url)}">${esc(ui.playNow)} ${esc(l.label)}${ARROW}</a>`);
+
+  const steps = st.steps
+    .map(
+      (s, k) =>
+        `<li class="st-step" data-step="${k}"><div class="st-card">` +
+        `<p class="st-n" aria-hidden="true">${k + 1}<span> / ${st.steps.length}</span></p>` +
+        `<h2 class="st-title">${esc(s.title)}</h2><p class="st-text">${breakable(s.text)}</p></div>` +
+        // the same step as a still drawing, for readers without JavaScript (hidden once the
+        // pinned drawing runs)
+        (p.art ? renderArtFigure(p, "pv--step", artFocus(p.art.kind, k)) : "") +
+        `</li>`
+    )
+    .join("");
+  const deeper = st.deeper || [];
+  const fold = deeper.length > 5; // keep it skimmable: the first three facts and the last one show
+  const shown = fold ? [...deeper.slice(0, 3), deeper[deeper.length - 1]] : deeper;
+  const folded = fold ? deeper.slice(3, -1) : [];
+  const factsHtml =
+    (shown.length ? `<ul class="deep-facts">${shown.map((d) => `<li>${breakable(d)}</li>`).join("")}</ul>` : "") +
+    (folded.length
+      ? `<details class="sp-more deep-more"><summary><span>${esc(ui.moreDetails)}</span>${CHEVRON}</summary>` +
+        `<ul class="deep-facts">${folded.map((d) => `<li>${breakable(d)}</li>`).join("")}</ul></details>`
+      : "");
+  const links = (st.links || []).map((l) => `<li><a href="${esc(l.url)}">${esc(l.label)}${ARROW}</a></li>`).join("");
+
+  // the next project with a story page (wrapping round), so the reader can keep going
+  const withStory = t.projects.filter((x) => x.story);
+  const at = withStory.findIndex((x) => x.id === id);
+  const next = withStory.length > 1 ? withStory[(at + 1) % withStory.length] : null;
+
+  const main =
+    `<section class="sh" aria-labelledby="sh-name"><div class="wrap sh-inner">` +
+    `<p class="sh-back"><a href="${home}#work">${BACK}${esc(ui.allWork)}</a></p>` +
+    `<h1 class="sh-name" id="sh-name">${esc(shortName(p))}</h1>` +
+    `<p class="sh-headline">${esc(st.headline)}</p>` +
+    `<p class="sh-claim">${esc(st.claim)}</p>` +
+    `<p class="sh-tech">${esc(p.tech)}</p>` +
+    `<div class="actions">${actions.join("")}</div>` +
+    `</div></section>` +
+    `<section class="st" aria-label="${esc(ui.story)}"><div class="wrap st-inner">` +
+    (p.art ? `<div class="st-stage">${renderArtFigure(p, "pv--story")}</div>` : "") +
+    `<ol class="st-steps">${steps}</ol>` +
+    `</div></section>` +
+    (factsHtml
+      ? `<section class="deep" aria-labelledby="h-deep"><div class="wrap">` +
+        `<h2 class="deep-title rv" id="h-deep">${esc(ui.deeperTitle)}</h2>` +
+        factsHtml +
+        (links ? `<ul class="deep-links">${links}</ul>` : "") +
+        `</div></section>`
+      : "") +
+    // after the proof, the way to get in touch, so a reader who landed here can act on it
+    `<section class="buy buy--mini" aria-labelledby="h-contact"><div class="wrap">` +
+    `<h2 class="buy-title" id="h-contact">${esc(t.home.contact.title)}</h2>` +
+    `<p class="buy-cta"><a class="btn btn--primary btn--big" data-email="0" href="${home}#contact">${esc(ui.email)}</a></p>` +
+    renderBuyLinks(t, content.site, lang) +
+    `</div></section>` +
+    `<nav class="sn" aria-label="${esc(ui.allWork)}"><div class="wrap sn-inner">` +
+    `<a class="sn-link" href="${home}#work">${BACK}${esc(ui.allWork)}</a>` +
+    (next ? `<a class="sn-link sn-link--next" href="${storyPath(lang, next.id)}">${esc(ui.nextProject)}: ${esc(shortName(next))}${NEXT}</a>` : "") +
+    `</div></nav>`;
+  return { nav: renderNav(t, home), main, footer: renderFooter(t) };
 }
 
-/* ------------------------------------------------------------------ */
-/* Path helpers in normalised coordinates, shared by poster and scene.  */
-/* ------------------------------------------------------------------ */
-export const lerp = (a, b, t) => a + (b - a) * t;
-function quad(p0, p1, p2, t) {
-  const u = 1 - t;
-  return u * u * p0 + 2 * u * t * p1 + t * t * p2;
-}
-function cubic(p0, p1, p2, p3, t) {
-  const u = 1 - t;
-  return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
-}
-export function inPoint(sy, t) {
-  const { src, router } = LAYOUT;
-  const cx = 0.25;
-  const cy = lerp(sy, router.y, 0.55);
-  return [quad(src.x, cx, router.x, t), quad(sy, cy, router.y, t)];
-}
-export function outPoint(tier, t) {
-  const r = LAYOUT.router;
-  return [cubic(r.x, r.x + 0.13, tier.x - 0.15, tier.x, t), cubic(r.y, r.y, tier.y, tier.y, t)];
-}
-
-/* ------------------------------------------------------------------ */
-/* Static poster (SVG): the same composition as the 3D scene, frozen.  */
-/* It carries no text, so it is the same in both languages.            */
-/* ------------------------------------------------------------------ */
-function mulberry32(seed) {
-  return function () {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-export function renderPoster() {
-  const W = 1200;
-  const H = 900;
-  const rnd = mulberry32(20261110);
-  const f = (n) => n.toFixed(1);
-  let routes = "";
-  const ins = 9;
-  for (let k = 0; k < ins; k++) {
-    const sy = lerp(LAYOUT.src.y0, LAYOUT.src.y1, k / (ins - 1));
-    let d = "";
-    for (let s = 0; s <= 24; s++) {
-      const [x, y] = inPoint(sy, s / 24);
-      d += (s ? "L" : "M") + f(x * W) + " " + f(y * H);
-    }
-    routes += `<path d="${d}"/>`;
-  }
-  for (const tier of LAYOUT.tiers) {
-    let d = "";
-    for (let s = 0; s <= 32; s++) {
-      const [x, y] = outPoint(tier, s / 32);
-      d += (s ? "L" : "M") + f(x * W) + " " + f(y * H);
-    }
-    routes += `<path d="${d}"/>`;
-  }
-  let dotsIn = "";
-  for (let i = 0; i < 70; i++) {
-    const sy = lerp(LAYOUT.src.y0, LAYOUT.src.y1, rnd());
-    const [x, y] = inPoint(sy, Math.pow(rnd(), 0.8));
-    dotsIn += `<circle cx="${f(x * W + (rnd() - 0.5) * 10)}" cy="${f(y * H + (rnd() - 0.5) * 10)}" r="${f(2 + rnd() * 2)}"/>`;
-  }
-  const tierDots = { haiku: "", sonnet: "", opus: "" };
-  for (let i = 0; i < 90; i++) {
-    const id = KINDS[(rnd() * KINDS.length) | 0];
-    const tier = LAYOUT.tiers.find((x) => x.id === id);
-    if (rnd() < 0.45) {
-      const [x, y] = outPoint(tier, 0.1 + rnd() * 0.85);
-      tierDots[id] += `<circle cx="${f(x * W)}" cy="${f(y * H)}" r="${f(2 + rnd() * 2)}"/>`;
-    } else {
-      const a = rnd() * Math.PI * 2;
-      const rad = 20 + rnd() * 55;
-      tierDots[id] += `<circle cx="${f(tier.x * W + Math.cos(a) * rad)}" cy="${f(tier.y * H + Math.sin(a) * rad * 0.55)}" r="${f(2 + rnd() * 2.4)}"/>`;
-    }
-  }
-  const rx = LAYOUT.router.x * W;
-  const ry = LAYOUT.router.y * H;
-  let nuclei = "";
-  for (const tier of LAYOUT.tiers) {
-    const cx = tier.x * W;
-    const cy = tier.y * H;
-    nuclei += `<g class="p-nucleus p-${tier.id}"><ellipse cx="${cx}" cy="${cy}" rx="44" ry="24" fill="none"/><path d="M${cx} ${cy - 15}L${cx + 13} ${cy}L${cx} ${cy + 15}L${cx - 13} ${cy}Z" fill="none"/></g>`;
-  }
-  return (
-    `<svg class="poster" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">` +
-    `<g class="p-routes" fill="none">${routes}</g>` +
-    `<g class="p-dots p-dots--in">${dotsIn}</g>` +
-    `<g class="p-dots p-haiku">${tierDots.haiku}</g><g class="p-dots p-sonnet">${tierDots.sonnet}</g><g class="p-dots p-opus">${tierDots.opus}</g>` +
-    `<g class="p-router" fill="none"><circle cx="${rx}" cy="${ry}" r="38"/><path d="M${rx} ${ry - 18}L${rx + 18} ${ry}L${rx} ${ry + 18}L${rx - 18} ${ry}Z"/></g>` +
-    nuclei +
-    `</svg>`
-  );
-}
+/** Projects that have a story page (the build makes one per language for each). */
+export const storyIds = (content) => content.en.projects.filter((p) => p.story).map((p) => p.id);
