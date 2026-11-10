@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="referrer" content="no-referrer">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="{{canonical}}">
+<link rel="alternate" hreflang="en" href="{{origin}}/en/">
+<link rel="alternate" hreflang="tr" href="{{origin}}/tr/">
+<link rel="alternate" hreflang="x-default" href="{{origin}}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{name}}">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:locale" content="{{og_locale}}">
+<meta property="og:locale:alternate" content="{{og_locale_alt}}">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f4f0" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4fa8'/%3E%3Cpath d='M11 8h11v3.4h-7.2v3.3H21v3.3h-6.2V24H11z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/site.css?v={{css_version}}">
+<script defer src="/assets/site.js?v={{js_version}}"></script>
+<noscript><style>.lang{display:none}</style></noscript>
+</head>
+<body data-force="{{force}}">
+<header class="bar">
+  <div class="wrap bar-inner">
+    <a class="bar-name" href="#top">{{name}}</a>
+    <nav class="bar-nav" data-slot="nav"><!--@nav--><!--/@nav--></nav>
+    <div class="lang" role="group" aria-label="{{toggle_label}}">
+      <button type="button" data-lang-btn="en" aria-pressed="{{en_pressed}}" lang="en">EN</button>
+      <button type="button" data-lang-btn="tr" aria-pressed="{{tr_pressed}}" lang="tr">TR</button>
+    </div>
+    <noscript>
+      <nav class="lang-plain" aria-label="{{toggle_label}}">
+        <a href="/en/" hreflang="en" lang="en"{{en_current}}>English</a>
+        <a href="/tr/" hreflang="tr" lang="tr"{{tr_current}}>Türkçe</a>
+      </nav>
+    </noscript>
+  </div>
+</header>
+<main id="top">
+  <section class="hero wrap">
+    <div class="hero-copy" data-slot="hero"><!--@hero--><!--/@hero--></div>
+    <figure class="viz">
+      <div class="viz-stage">
+        <!--@poster--><!--/@poster-->
+        <div class="vz-overlay" data-slot="stage"><!--@stage--><!--/@stage--></div>
+      </div>
+      <div class="pin" id="vz-pin" hidden></div>
+      <figcaption class="viz-cap" data-slot="caption"><!--@caption--><!--/@caption--></figcaption>
+    </figure>
+  </section>
+  <div class="wrap" data-slot="sections"><!--@sections--><!--/@sections--></div>
+</main>
+<footer class="foot"><div class="wrap foot-inner" data-slot="footer"><!--@footer--><!--/@footer--></div></footer>
+</body>
+</html>

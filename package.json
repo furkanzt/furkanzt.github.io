@@ -1,0 +1,13 @@
+{
+  "name": "furkanzt-github-io",
+  "private": true,
+  "type": "module",
+  "description": "Dev tooling only. The published site is the static files in docs/, built by `npm run build`.",
+  "scripts": {
+    "build": "node scripts/build_site.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "three": "0.186.1"
+  }
+}

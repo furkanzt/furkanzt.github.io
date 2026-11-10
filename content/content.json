@@ -1,0 +1,329 @@
+{
+  "en": {
+    "name": "Mustafa Furkan Özateş",
+    "title": "Mustafa Furkan Özateş — AI-native engineer",
+    "headline": "AI-native engineer: production LLM systems built, tested and verified with coding agents.",
+    "experience": [
+      {
+        "org": "İMPARK Eğitim Bilişim LTD",
+        "location": "Ankara, Türkiye",
+        "roles": [
+          {
+            "title": "Junior AI Engineer",
+            "dates": "Mar 2026 – Present"
+          }
+        ],
+        "bullets": [
+          "Build and ship production LLM systems with Claude Code as my primary development workflow, including an LGS/YKS Question Generator for math exam prep, where a second model tier independently re-solves every question before release (FastAPI, React/Vite, Gemini).",
+          "Built a multi-agent textbook audit pipeline (independent scan lenses read a whole book, three-vote verification against the page images, change instructions for the typesetter) and a template-driven book generator that outputs print-ready HTML/PDF checked against MEB's 2025 textbook rules.",
+          "Built a curriculum-mining pipeline extracting structured Knowledge Components from official MEB textbooks and Maarif Modeli curricula (grade-5 math and science, 440+ KCs) for an adaptive-learning platform, including prerequisite graphs and BKT/IRT enrichment.",
+          "Introduced a TDD/BDD testing discipline (executable Gherkin scenario catalogue, CI-enforced test citations) across my İMPARK codebases; published as an open-source Claude Code plugin.",
+          "Orchestrated multiple AI models to rewrite an MEB-curriculum 6th-grade Bilişim Teknolojileri ve Yazılım textbook: separate models draft, verify and fix content through a documented pipeline, aligning kazanım codes and \"bağlam temelli\" (context-based) questions to the 2025 Türkiye Yüzyılı Maarif Modeli."
+        ]
+      },
+      {
+        "org": "Güriş Holding",
+        "location": "Gölbaşı, Ankara, Türkiye",
+        "roles": [
+          {
+            "title": "Associate IT Engineer",
+            "dates": "Jan 2026 – Mar 2026"
+          },
+          {
+            "title": "IT Young Talent (Intern)",
+            "dates": "Oct 2025 – Dec 2025"
+          }
+        ],
+        "bullets": [
+          "Provided IT helpdesk support, resolving users' computer, account and internet problems by switching access points or connecting them to the remote servers linked to the holding's geothermal, wind and hydroelectric (JES, RES, HES) power plants.",
+          "Supported computer updates and resolved hardware and software issues."
+        ]
+      }
+    ],
+    "education": {
+      "org": "Middle East Technical University (METU)",
+      "location": "Ankara, Türkiye",
+      "degrees": [
+        {
+          "title": "M.S., Data Informatics (with Thesis), GPA: 3.75/4.00",
+          "dates": "2025 – Present",
+          "thesis": "Thesis: \"Agentic-AI-Driven Technical Management Processes Considering Technical Debt\" (advisor: Assoc. Prof. Dr. Özden Özcan Top)."
+        },
+        {
+          "title": "B.S., Computer Education and Instructional Technology, GPA: 3.73/4.00",
+          "dates": "2020 – 2025"
+        }
+      ]
+    },
+    "projects": [
+      {
+        "name": "claude-agenting (open source)",
+        "tech": "Python · Claude Code hooks · Evals",
+        "url": "https://github.com/furkanzt/claude-agenting",
+        "text": "Claude Code plugin that routes each subagent to the cheapest model tier that does the job, chosen by an eval harness measuring success rate and cost per run.",
+        "links": []
+      },
+      {
+        "name": "claude-tdd-bdd-harness (open source)",
+        "tech": "Claude Code plugin · Gherkin · TDD/BDD",
+        "url": "https://github.com/furkanzt/claude-tdd-bdd-harness",
+        "text": "Open-source Claude Code plugin for self-enforcing TDD and BDD in any repo: an executable Gherkin scenario catalogue with machine-verified test citations, plus adversarial test audits.",
+        "links": []
+      },
+      {
+        "name": "Kutie games",
+        "tech": "TypeScript · Cloudflare Workers · Durable Objects · D1",
+        "url": null,
+        "text": "Three live browser games (Matching Numbers, Arrow Escape, Cobite), including real-time two-player co-op on Durable Objects; unit-tested game and room logic, deployed on Cloudflare. Built with Claude Code.",
+        "links": [
+          {
+            "label": "Matching Numbers",
+            "url": "https://matching-numbers.kutie.workers.dev"
+          },
+          {
+            "label": "Arrow Escape",
+            "url": "https://arrow-escape.kutie.workers.dev"
+          },
+          {
+            "label": "Cobite",
+            "url": "https://cobite.kutie.workers.dev"
+          }
+        ]
+      },
+      {
+        "name": "claude-mstodo (open source)",
+        "tech": "JavaScript · MCP · Microsoft Graph",
+        "url": "https://github.com/furkanzt/claude-mstodo",
+        "text": "MCP server and /mstodo planning command that connect Microsoft To Do to Claude Code and Claude Desktop; ships as a Claude Code plugin, a one-click Desktop extension, or from source.",
+        "links": []
+      },
+      {
+        "name": "claude-taste-detector (open source)",
+        "tech": "Shell · Claude Code hooks",
+        "url": "https://github.com/furkanzt/claude-taste-detector",
+        "text": "Claude Code plugin that wires Emil Kowalski's design-engineering guides to impeccable's detector findings through a global hook, so motion and feel guidance loads on the first UI edit.",
+        "links": []
+      },
+      {
+        "name": "yzt-curricula (METU AI Society)",
+        "tech": "Markdown · Curriculum design",
+        "url": "https://github.com/furkanzt/yzt-curricula",
+        "text": "Open self-learning curricula for AI (programming fundamentals and generative AI tracks) written for METU AI Society members and anyone who wants to learn; 13 GitHub stars.",
+        "links": []
+      }
+    ],
+    "research": [
+      {
+        "title": "Research Intern, METU CEIT — LLM-based AI Writing Assistant (\"Peer Feedback with LLM\")",
+        "dates": "Oct 2024 – Jun 2025",
+        "people": "Professor: Assoc. Prof. Dr. Erkan Er"
+      },
+      {
+        "title": "Teaching Assistant (Volunteer), METU — quizzes, grading, 2 substitute lectures across 3 courses",
+        "dates": "Feb 2024 – Dec 2024",
+        "people": "Professors: Prof. Dr. Soner Yıldırım, Assoc. Prof. Dr. Göknur Kaplan, Assoc. Prof. Dr. Erkan Er"
+      },
+      {
+        "title": "President, METU AI Society — taught Python and Machine Learning courses",
+        "dates": "May 2024 – Jun 2025",
+        "people": ""
+      }
+    ],
+    "skills": [
+      "Technical: Python, TypeScript, SQL / PostgreSQL, React, FastAPI, Fastify, Cloudflare Workers / D1 / Durable Objects, Docker, CI, LLM Integration (OpenAI, Anthropic, Gemini), LLM Evaluation, Prompt Engineering, Agentic development with Claude Code",
+      "Languages: English (Full Professional Proficiency — YDS 83.75), Turkish (Native)"
+    ],
+    "availability": "Open to AI-engineering and backend roles, Ankara or remote.",
+    "location": "Ankara, Türkiye",
+    "description": "Mustafa Furkan Özateş: AI-native engineer in Ankara. Production LLM systems built, tested and verified with coding agents.",
+    "ui": {
+      "toggle": "Language",
+      "experience": "Experience",
+      "projects": "Projects",
+      "research": "Research & Teaching",
+      "education": "Education",
+      "skills": "Skills",
+      "contact": "Contact",
+      "email": "Email",
+      "emailUni": "Email (university)",
+      "gamesNote": "Some company and campus networks block workers.dev, where the three games run.",
+      "openSource": "Open source",
+      "viewOnGitHub": "View on GitHub",
+      "playNow": "Play",
+      "cv": "CV (PDF)"
+    }
+  },
+  "tr": {
+    "name": "Mustafa Furkan Özateş",
+    "title": "Mustafa Furkan Özateş — AI-native mühendis",
+    "headline": "AI-native mühendis: kodlama ajanlarıyla üretim LLM sistemleri kuran, test eden ve doğrulayan.",
+    "experience": [
+      {
+        "org": "İMPARK Eğitim Bilişim LTD",
+        "location": "Ankara, Türkiye",
+        "roles": [
+          {
+            "title": "Junior AI Engineer",
+            "dates": "Mart 2026 – Devam ediyor"
+          }
+        ],
+        "bullets": [
+          "Birincil geliştirme iş akışım olarak Claude Code ile üretim LLM sistemleri geliştirip yayına alıyorum; bunlar arasında matematik sınavı hazırlığı için LGS/YKS Question Generator de var. Yayından önce her soruyu ikinci bir model katmanı bağımsız olarak yeniden çözüyor (FastAPI, React/Vite, Gemini).",
+          "Ders kitapları için çok ajanlı bir denetim hattı (kitabın tamamını tarayan bağımsız mercekler, sayfa görüntüleriyle üç oylu doğrulama, dizgiciye değişiklik talimatı) ve MEB'in 2025 ders kitabı kurallarına göre denetlenen, baskıya hazır HTML/PDF üreten şablon tabanlı bir kitap üreticisi geliştirdim.",
+          "MEB ders kitaplarından ve Maarif Modeli öğretim programlarından yapılandırılmış Knowledge Component'ler çıkaran bir müfredat madenciliği hattı kurdum (5. sınıf matematik ve fen, 440+ KC); uyarlanabilir öğrenme platformu için ön koşul grafikleri ve BKT/IRT zenginleştirmesi içeriyor.",
+          "İMPARK kod tabanlarında TDD/BDD test disiplini başlattım (çalıştırılabilir Gherkin senaryo kataloğu, CI ile zorunlu test atıfları); açık kaynaklı bir Claude Code eklentisi olarak yayımlandı.",
+          "Yapay zekâ modellerinin orkestrasyonuyla 6. sınıf Bilişim Teknolojileri ve Yazılım ders kitabının MEB müfredatına göre yeniden yazımını yönettim; ayrı modeller taslak üretme, doğrulama ve düzeltme aşamalarını belgelenmiş bir hatta yürüttü; kazanım kodları ve \"bağlam temelli\" soruları 2025 Türkiye Yüzyılı Maarif Modeli'ne hizaladım."
+        ]
+      },
+      {
+        "org": "Güriş Holding",
+        "location": "Gölbaşı, Ankara, Türkiye",
+        "roles": [
+          {
+            "title": "BT Aday Mühendisi",
+            "dates": "Oca 2026 – Mar 2026"
+          },
+          {
+            "title": "BT Genç Yetenek (Stajyer)",
+            "dates": "Eki 2025 – Ara 2025"
+          }
+        ],
+        "bullets": [
+          "BT yardım masası desteği verdim; kullanıcıların bilgisayar, hesap ve internet sorunlarını erişim noktalarını değiştirerek veya holdingin JES, RES ve HES santrallerine bağlı uzak sunuculara bağlayarak çözdüm.",
+          "Bilgisayar güncellemelerinde destek verdim; donanım ve yazılım sorunlarını giderdim."
+        ]
+      }
+    ],
+    "education": {
+      "org": "Orta Doğu Teknik Üniversitesi (ODTÜ)",
+      "location": "Ankara, Türkiye",
+      "degrees": [
+        {
+          "title": "Y.L., Veri Bilişimi (Data Informatics), Tezli, GNO: 3.75/4.00",
+          "dates": "2025 – Devam ediyor",
+          "thesis": "Tez: \"Teknik Borç Dikkate Alınarak Ajan Yapay Zekâ Destekli Teknik Yönetim Süreçleri\" (danışman: Doç. Dr. Özden Özcan Top)."
+        },
+        {
+          "title": "Lisans, Bilgisayar ve Öğretim Teknolojileri Eğitimi, GNO: 3.73/4.00",
+          "dates": "2020 – 2025"
+        }
+      ]
+    },
+    "projects": [
+      {
+        "name": "claude-agenting (açık kaynak)",
+        "tech": "Python · Claude Code hooks · Evals",
+        "url": "https://github.com/furkanzt/claude-agenting",
+        "text": "Her alt ajanı, başarı oranı ve çalıştırma başına maliyeti ölçen bir değerlendirme (eval) düzeneğiyle işi yapabilen en ucuz model katmanına yönlendiren Claude Code eklentisi.",
+        "links": []
+      },
+      {
+        "name": "claude-tdd-bdd-harness (açık kaynak)",
+        "tech": "Claude Code eklentisi · Gherkin · TDD/BDD",
+        "url": "https://github.com/furkanzt/claude-tdd-bdd-harness",
+        "text": "Herhangi bir depoda TDD ve BDD disiplinini kendiliğinden zorunlu kılan açık kaynaklı Claude Code eklentisi: makine tarafından doğrulanan test atıflarıyla çalıştırılabilir Gherkin senaryo kataloğu ve çekişmeli test denetimleri.",
+        "links": []
+      },
+      {
+        "name": "Kutie games",
+        "tech": "TypeScript · Cloudflare Workers · Durable Objects · D1",
+        "url": null,
+        "text": "Üç canlı tarayıcı oyunu (Matching Numbers, Arrow Escape, Cobite); Durable Objects üzerinde gerçek zamanlı iki kişilik işbirlikçi mod dahil; oyun ve oda mantığı birim testli, Cloudflare üzerinde yayında. Claude Code ile geliştirildi.",
+        "links": [
+          {
+            "label": "Matching Numbers",
+            "url": "https://matching-numbers.kutie.workers.dev"
+          },
+          {
+            "label": "Arrow Escape",
+            "url": "https://arrow-escape.kutie.workers.dev"
+          },
+          {
+            "label": "Cobite",
+            "url": "https://cobite.kutie.workers.dev"
+          }
+        ]
+      },
+      {
+        "name": "claude-mstodo (açık kaynak)",
+        "tech": "JavaScript · MCP · Microsoft Graph",
+        "url": "https://github.com/furkanzt/claude-mstodo",
+        "text": "Microsoft To Do'yu Claude Code ve Claude Desktop'a bağlayan MCP sunucusu ve /mstodo planlama komutu; Claude Code eklentisi, tek tıkla kurulan Claude Desktop uzantısı ya da kaynaktan kurulum olarak sunuluyor.",
+        "links": []
+      },
+      {
+        "name": "claude-taste-detector (açık kaynak)",
+        "tech": "Shell · Claude Code hooks",
+        "url": "https://github.com/furkanzt/claude-taste-detector",
+        "text": "Emil Kowalski'nin tasarım mühendisliği kılavuzlarını impeccable'ın dedektör bulgularına genel (global) bir hook ile bağlayan Claude Code eklentisi; ilk arayüz düzenlemesinde hareket ve his rehberi otomatik yüklenir.",
+        "links": []
+      },
+      {
+        "name": "yzt-curricula (ODTÜ Yapay Zekâ Topluluğu)",
+        "tech": "Markdown · Müfredat tasarımı",
+        "url": "https://github.com/furkanzt/yzt-curricula",
+        "text": "ODTÜ Yapay Zekâ Topluluğu üyeleri ve öğrenmek isteyen herkes için yazılmış açık yapay zekâ öz-öğrenme müfredatları (programlama temelleri ve üretken yapay zekâ parkurları); GitHub'da 13 yıldız.",
+        "links": []
+      }
+    ],
+    "research": [
+      {
+        "title": "Araştırma Stajyeri, ODTÜ BÖTE — LLM tabanlı Yazım Asistanı (\"Peer Feedback with LLM\")",
+        "dates": "Eki 2024 – Haz 2025",
+        "people": "Öğretim üyesi: Doç. Dr. Erkan Er"
+      },
+      {
+        "title": "Gönüllü Öğretim Asistanı, ODTÜ — kısa sınav ve notlandırma, 3 derste 2 vekil ders",
+        "dates": "Şub 2024 – Ara 2024",
+        "people": "Öğretim üyeleri: Prof. Dr. Soner Yıldırım, Doç. Dr. Göknur Kaplan, Doç. Dr. Erkan Er"
+      },
+      {
+        "title": "Başkan, ODTÜ Yapay Zekâ Topluluğu — Python ve Makine Öğrenmesi dersleri verdi",
+        "dates": "May 2024 – Haz 2025",
+        "people": ""
+      }
+    ],
+    "skills": [
+      "Teknik: Python, TypeScript, SQL / PostgreSQL, React, FastAPI, Fastify, Cloudflare Workers / D1 / Durable Objects, Docker, CI, LLM Entegrasyonu (OpenAI, Anthropic, Gemini), LLM Değerlendirmesi, Prompt Mühendisliği, Claude Code ile ajan tabanlı geliştirme",
+      "Diller: İngilizce (Tam profesyonel yeterlilik — YDS 83.75), Türkçe (Ana dil)"
+    ],
+    "availability": "Yapay zekâ mühendisliği ve backend rollerine açığım; Ankara veya uzaktan.",
+    "location": "Ankara, Türkiye",
+    "description": "Mustafa Furkan Özateş: Ankara'da AI-native mühendis. Kodlama ajanlarıyla üretim LLM sistemleri kuran, test eden ve doğrulayan.",
+    "ui": {
+      "toggle": "Dil",
+      "experience": "Deneyim",
+      "projects": "Projeler",
+      "research": "Araştırma ve Öğretim",
+      "education": "Eğitim",
+      "skills": "Beceriler",
+      "contact": "İletişim",
+      "email": "E-posta",
+      "emailUni": "E-posta (üniversite)",
+      "gamesNote": "Bazı şirket ve kampüs ağları, üç oyunun çalıştığı workers.dev adreslerini engelliyor.",
+      "openSource": "Açık kaynak",
+      "viewOnGitHub": "GitHub'da gör",
+      "playNow": "Oyna",
+      "cv": "Özgeçmiş (PDF)"
+    }
+  },
+  "site": {
+    "origin": "https://furkanzt.github.io",
+    "emails": [
+      {
+        "user": "furkan.ozates",
+        "domain": "gmail.com"
+      },
+      {
+        "user": "furkan.ozates",
+        "domain": "metu.edu.tr"
+      }
+    ],
+    "linkedin": "https://www.linkedin.com/in/furkanzt/",
+    "github": "https://github.com/furkanzt",
+    "cv": {
+      "en": "/assets/cv/MustafaFurkanOzates_CV_EN.pdf",
+      "tr": "/assets/cv/MustafaFurkanOzates_CV_TR.pdf"
+    }
+  }
+}

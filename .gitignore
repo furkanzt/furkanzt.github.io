@@ -4,3 +4,6 @@ DESIGN.md
 .impeccable/
 content/private/
 .DS_Store
+node_modules/
+prototypes/
+__pycache__/
