@@ -1,22 +1,27 @@
 /* furkanzt.github.io: technical minimal. Neutral ground, one accent, hairlines, a 12-column grid. */
 :root {
-  color-scheme: dark light;
-  --bg: #0b0d10;
-  --bg-raise: #101318;
-  --fg: #e8eaed;
-  --fg-2: #adb3bc;
-  --fg-3: #8b929d;
-  --line: #20242b;
-  --line-2: #2e343d;
+  /* Light only, whatever the visitor's system theme (Furkan, 10 Nov 2026). "only" also keeps
+     browsers that auto-darken pages (Chrome on Android) from inverting it. */
+  color-scheme: only light;
+  --bg: #f4f4f0;
+  --bg-raise: #ebebe5;
+  --fg: #13161a;
+  --fg-2: #434952;
+  --fg-3: #585f69;
+  --line: #d9d9d2;
+  --line-2: #c3c4bb;
   --accent: #c6f23a;
-  --accent-ink: #c6f23a;
-  --on-accent: #0b0d10;
-  --dot-grid: #1b1f25;
+  --accent-ink: #4a6400;
+  --on-accent: #13161a;
+  --dot-grid: #dedfd8;
 
-  --viz-mode: dark;
-  --viz-neutral: #8b929d;
-  --viz-accent: #c6f23a;
-  --viz-line: #262b33;
+  --viz-mode: light;
+  /* a step darker than first drafted: the particles read faint on the light ground */
+  --viz-neutral: #6b717b;
+  --viz-accent: #557300;
+  --viz-line: #d0d1c9;
+  --viz-bad: #b0412e;
+  --viz-warn: #8f5f00;
 
   --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
@@ -45,28 +50,6 @@
 
   --gutter: clamp(16px, 4vw, 40px);
   --bar-h: 56px;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f4f4f0;
-    --bg-raise: #ebebe5;
-    --fg: #13161a;
-    --fg-2: #434952;
-    --fg-3: #585f69;
-    --line: #d9d9d2;
-    --line-2: #c3c4bb;
-    --accent: #c6f23a;
-    --accent-ink: #4a6400;
-    --on-accent: #13161a;
-    --dot-grid: #dedfd8;
-
-    --viz-mode: light;
-    /* a step darker than first drafted: the particles read faint on the light ground */
-    --viz-neutral: #6b717b;
-    --viz-accent: #557300;
-    --viz-line: #d0d1c9;
-  }
 }
 
 *,
@@ -745,7 +728,8 @@ code {
   margin-top: var(--s5);
   display: grid;
   gap: var(--s4);
-  max-width: 70ch;
+  /* ch is the width of "0", wider than average text: 62ch keeps lines near 75 characters */
+  max-width: 62ch;
 }
 .bullets li {
   position: relative;
@@ -762,15 +746,12 @@ code {
   background: var(--fg-3);
 }
 
-/* projects: varied, not identical boxes */
+/* projects: one row per project, its illustration beside the text (above it on phones) */
 .projects {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  column-gap: var(--s6);
 }
 .proj {
-  grid-column: 1 / -1;
-  padding-top: var(--s5);
+  padding-top: var(--s6);
   padding-bottom: var(--s6);
   border-top: 1px solid var(--line);
   min-width: 0;
@@ -778,6 +759,19 @@ code {
 .proj:first-child {
   border-top: none;
   padding-top: 0;
+}
+.proj--art {
+  display: grid;
+  gap: var(--s4) var(--s6);
+  align-items: start;
+}
+@media (min-width: 760px) {
+  .proj--art {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+.proj-body {
+  min-width: 0;
 }
 .proj-name {
   font-size: var(--t-lg);
@@ -792,7 +786,7 @@ code {
 }
 .proj-text {
   color: var(--fg-2);
-  max-width: 68ch;
+  max-width: 62ch;
 }
 .proj-main {
   margin-top: var(--s3);
@@ -814,45 +808,363 @@ code {
   color: var(--fg-3);
 }
 
-/* the lead project: tied to the figure above by the accent rule */
-.proj--feature {
-  position: relative;
-  padding: var(--s5) 0 var(--s6);
+/* ---- the card illustration: a static drawing, replaced by the live one when it runs ---- */
+.pv {
+  margin: 0;
+  min-width: 0;
+  background: var(--bg);
 }
-.proj--feature::before {
+/* while its explainer is open, the illustration stays in view beside (or above) the steps */
+.proj.is-open .pv {
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 1;
+  padding-top: var(--s3);
+}
+@media (min-width: 760px) {
+  .proj.is-open .pv {
+    top: calc(var(--bar-h) + var(--s5));
+    padding-top: 0;
+  }
+}
+.pv-stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-block: 1px solid var(--line);
+  background-image: radial-gradient(var(--dot-grid) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  background-position: 10px 10px;
+  overflow: hidden;
+}
+.pv-poster,
+.pv-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pv-poster {
+  transition: opacity 600ms var(--ease-out);
+}
+.pv-canvas {
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out);
+}
+.pv.is-live .pv-canvas {
+  opacity: 1;
+}
+.pv.is-live .pv-poster {
+  opacity: 0;
+}
+.pv-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pv-label {
+  position: absolute;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  line-height: 1.2;
+  color: var(--fg-2);
+  white-space: nowrap;
+  transition: opacity 250ms var(--ease-out);
+}
+/* A step focuses some parts of the drawing; the rest steps back. */
+.pv-poster .ca,
+.pv-poster [class^="ca-"] {
+  transition: opacity 250ms var(--ease-out);
+}
+.pv[data-focus] .pv-poster .ca {
+  opacity: 0.22;
+}
+
+/* tdd: scenarios cite tests; a check walks every citation; an unproven scenario is tagged */
+.pv-poster--tdd {
+  fill: none;
+  stroke-width: 1.5;
+}
+.pv-poster--tdd path,
+.pv-poster--tdd rect,
+.pv-poster--tdd circle {
+  vector-effect: non-scaling-stroke;
+}
+.pv-poster--tdd .ca-scen,
+.pv-poster--tdd .ca-tests {
+  stroke: var(--viz-neutral);
+}
+.pv-poster--tdd .ca-card {
+  fill: var(--bg-raise);
+}
+.pv-poster--tdd .ca-links {
+  stroke: var(--viz-accent);
+}
+.pv-poster--tdd .ca-scan {
+  stroke: var(--viz-neutral);
+  stroke-dasharray: 3 6;
+}
+.pv-poster--tdd .ca-gate-ok {
+  stroke: var(--viz-accent);
+  stroke-width: 2;
+}
+.pv-poster--tdd .ca-gate-bad {
+  stroke: var(--viz-bad);
+  stroke-width: 2;
+  opacity: 0;
+}
+.pv-poster--tdd .ca-ghost {
+  stroke: var(--viz-bad);
+  stroke-dasharray: 5 5;
+  opacity: 0;
+}
+/* the tag on an unproven scenario is the label itself, so it fits its text in either language */
+.pv-label--gap {
+  padding: 2px 7px;
+  border: 1.5px solid var(--viz-warn);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--viz-warn);
+  opacity: 0;
+}
+.pv[data-focus~="scen"] .ca-scen,
+.pv[data-focus~="links"] .ca-links,
+.pv[data-focus~="tests"] .ca-tests,
+.pv[data-focus~="check"] .ca-check {
+  opacity: 1;
+}
+.pv[data-focus]:not([data-focus~="scen"]) .pv-label--scenarios,
+.pv[data-focus]:not([data-focus~="tests"]) .pv-label--tests,
+.pv[data-focus]:not([data-focus~="check"]) .pv-label--check {
+  opacity: 0.4;
+}
+.pv[data-focus~="ghost"] .ca-ghost,
+.pv[data-focus~="ghost"] .ca-gate-bad,
+.pv[data-focus~="gap"] .pv-label--gap {
+  opacity: 1;
+}
+.pv[data-focus~="ghost"] .ca-l1,
+.pv[data-focus~="ghost"] .ca-t2,
+.pv[data-focus~="ghost"] .ca-gate-ok,
+.pv[data-focus~="gap"] .ca-l3,
+.pv[data-focus~="gap"] .ca-t3 {
+  opacity: 0;
+}
+
+/* ---- the explainer: a <details> that opens in place ---- */
+.xp {
+  margin-top: var(--s5);
+  border-top: 1px solid var(--line);
+}
+.xp-sum,
+.xp-deep-sum {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 48px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.xp-sum::-webkit-details-marker,
+.xp-deep-sum::-webkit-details-marker {
+  display: none;
+}
+.xp-sum-t {
+  font-weight: 600;
+  font-size: var(--t-md);
+  color: var(--fg);
+  transition: color 150ms ease;
+}
+.xp-sum-n {
+  font-size: var(--t-sm);
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+.xp-chev {
+  margin-left: auto;
+  color: var(--fg-3);
+  transition: transform 200ms var(--ease-out);
+}
+.xp[open] > .xp-sum .xp-chev,
+.xp-deep[open] > .xp-deep-sum .xp-chev {
+  transform: rotate(180deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp-sum:hover .xp-sum-t,
+  .xp-deep-sum:hover span {
+    color: var(--accent-ink);
+  }
+}
+.xp-body,
+.xp-deep-body {
+  padding-bottom: var(--s3);
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+@starting-style {
+  .xp[open] > .xp-body,
+  .xp-deep[open] > .xp-deep-body {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.xp-lead {
+  max-width: 62ch;
+  color: var(--fg);
+}
+.xp-steps {
+  margin-top: var(--s4);
+  display: grid;
+  gap: var(--s1);
+}
+.xp-step {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: var(--s3);
+  padding: var(--s3);
+  margin-inline: calc(-1 * var(--s3));
+  border-radius: 6px;
+  transition: background-color 200ms ease;
+}
+.xp-n {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  font: 600 var(--t-xs) / 1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.xp-st-t {
+  font-weight: 600;
+  font-size: var(--t-md);
+  line-height: 1.5;
+}
+.xp-st-x {
+  margin-top: var(--s1);
+  font-size: var(--t-md);
+  color: var(--fg-2);
+  max-width: 60ch;
+  overflow-wrap: anywhere;
+}
+/* with the script: one step is the current one, and the illustration follows it */
+.xp.is-stepped .xp-step {
+  cursor: pointer;
+}
+.xp.is-stepped .xp-step:not(.is-current) .xp-st-x {
+  color: var(--fg-3);
+}
+.xp-step.is-current {
+  background: var(--bg-raise);
+}
+.xp-step.is-current .xp-n {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp.is-stepped .xp-step:not(.is-current):hover .xp-n {
+    border-color: var(--fg-3);
+    color: var(--fg);
+  }
+}
+.xp-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-top: var(--s4);
+}
+.xp-nav[hidden] {
+  display: none;
+}
+.xp-count {
+  flex: 1;
+  text-align: center;
+  font-size: var(--t-sm);
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+.xp-btn {
+  appearance: none;
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 var(--s4);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  font: 550 var(--t-md) / 1 var(--sans);
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+.xp-btn--next {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+.xp-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp-btn:not(:disabled):hover {
+    border-color: var(--fg-3);
+  }
+  .xp-btn--next:not(:disabled):hover {
+    background: color-mix(in srgb, var(--fg) 86%, var(--bg));
+  }
+}
+.xp-btn:not(:disabled):active {
+  transform: scale(0.97);
+  transition: transform 120ms var(--ease-out);
+}
+.xp-deep {
+  margin-top: var(--s5);
+  border-top: 1px solid var(--line);
+}
+.xp-deep-sum span {
+  font-weight: 600;
+  font-size: var(--t-md);
+  transition: color 150ms ease;
+}
+.xp-facts {
+  display: grid;
+  gap: var(--s3);
+  max-width: 62ch;
+  font-size: var(--t-md);
+}
+.xp-facts li {
+  position: relative;
+  padding-left: var(--s6);
+  color: var(--fg-2);
+  overflow-wrap: anywhere;
+}
+.xp-facts li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
-  width: 48px;
-  height: 2px;
-  background: var(--accent);
+  top: 0.8em;
+  width: 16px;
+  height: 1px;
+  background: var(--fg-3);
 }
-.proj--feature:first-child {
-  padding-top: var(--s5);
+.xp-links {
+  margin-top: var(--s4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s5);
+  font-size: var(--t-md);
 }
-.proj--feature .proj-name {
-  font-size: var(--t-xl);
-  letter-spacing: -0.02em;
-}
-.proj--feature .proj-text {
-  font-size: var(--t-lg);
-  line-height: 1.55;
-  color: var(--fg);
-}
-
-/* a two-column row: identity left, prose right */
-@media (min-width: 700px) {
-  .proj--row,
-  .proj--games {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 4fr);
-    column-gap: var(--s6);
-  }
-  .proj--row .proj-main,
-  .proj--games .proj-main {
-    margin-top: 0;
-  }
+.xp-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 550;
 }
 
 /* games: the play links are the content */
@@ -920,22 +1232,6 @@ code {
   font-size: var(--t-sm);
   color: var(--fg-3);
   max-width: 60ch;
-}
-
-/* the last three: a compact trio */
-.proj--trio .proj-main {
-  margin-top: var(--s2);
-}
-.proj--trio .proj-text {
-  font-size: var(--t-md);
-}
-@media (min-width: 900px) {
-  .proj--trio {
-    grid-column: span 2;
-  }
-  .proj--trio + .proj--trio {
-    position: relative;
-  }
 }
 
 /* research, education rows */
@@ -1113,7 +1409,20 @@ a.c-link:not([href]) {
       opacity: 0;
     }
   }
-  .btn:active {
+  .btn:active,
+  .xp-btn:not(:disabled):active {
     transform: none;
+  }
+  .pv-poster,
+  .pv-canvas {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .xp[open] > .xp-body,
+    .xp-deep[open] > .xp-deep-body {
+      transform: none;
+    }
   }
 }

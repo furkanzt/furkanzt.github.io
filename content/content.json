@@ -57,6 +57,7 @@
     },
     "projects": [
       {
+        "id": "agenting",
         "name": "claude-agenting (open source)",
         "tech": "Python · Claude Code hooks · Evals",
         "url": "https://github.com/furkanzt/claude-agenting",
@@ -64,13 +65,69 @@
         "links": []
       },
       {
+        "id": "tdd-bdd-harness",
         "name": "claude-tdd-bdd-harness (open source)",
         "tech": "Claude Code plugin · Gherkin · TDD/BDD",
         "url": "https://github.com/furkanzt/claude-tdd-bdd-harness",
         "text": "Open-source Claude Code plugin for self-enforcing TDD and BDD in any repo: an executable Gherkin scenario catalogue with machine-verified test citations, plus adversarial test audits.",
-        "links": []
+        "links": [],
+        "art": {
+          "kind": "tdd",
+          "labels": {
+            "scenarios": "scenarios",
+            "tests": "tests",
+            "check": "check on every push",
+            "gap": "@gap @wip"
+          }
+        },
+        "explain": {
+          "lead": "Every behaviour a program promises becomes a plain-English scenario tied to a real test, and the build fails when a promise has no working proof.",
+          "steps": [
+            {
+              "title": "Write the behaviour down",
+              "text": "Each behaviour is written as a short Given / When / Then scenario in plain English, one file per area of the product."
+            },
+            {
+              "title": "Point it at its proof",
+              "text": "Every scenario names the test that proves it in a “Backed by” line, for example tests/test_pricing.py::test_discount_never_exceeds_cap."
+            },
+            {
+              "title": "Check every link on each push",
+              "text": "A guard runs on every push and fails the build when a scenario has no proof, cites a test that no longer exists, or the coverage index is out of date."
+            },
+            {
+              "title": "Mark what is not proven yet",
+              "text": "A behaviour without a test is allowed only when it is openly tagged @gap @wip. A bare @gap fails the build, and once the gaps reach zero they stay at zero."
+            }
+          ],
+          "deeper": [
+            "Citations resolve three forms: Python tests (tests/x.py::test_fn), JavaScript tests (web/src/x.test.ts > does the thing) and checks that only a live system can run (scripts/quality/checks.py::check_fn).",
+            "The guard's own checkers are pure functions with red-path proofs on deliberately broken inputs, so the guard is itself tested.",
+            "A new test earns its citation only after it fails against a deliberate mutation of the code it protects.",
+            "An adversarial audit playbook lists the ways a green test can still lie, such as self-referential pins and vacuous fixtures, and runs on its own when you say \"audit my tests\".",
+            "Behaviour that only a running system can show is a first-class scenario tagged @loop: it runs on a schedule and its citation is still checked on every push.",
+            "In the plugin install, three hooks remind Claude at session start, on test edits and on commit. They never block; the guard on each push is the real gate.",
+            "Adoption is opt-in: it asks once per project and remembers a no.",
+            "What it does not claim: the guard checks that each scenario points to a real test, not that every line of code has a scenario. It makes unproven promises visible."
+          ],
+          "links": [
+            {
+              "label": "The contract (SKILL.md)",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/SKILL.md"
+            },
+            {
+              "label": "Adversarial audit playbook",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/reference/audit.md"
+            },
+            {
+              "label": "Changelog",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/CHANGELOG.md"
+            }
+          ]
+        }
       },
       {
+        "id": "kutie-games",
         "name": "Kutie games",
         "tech": "TypeScript · Cloudflare Workers · Durable Objects · D1",
         "url": null,
@@ -91,6 +148,7 @@
         ]
       },
       {
+        "id": "mstodo",
         "name": "claude-mstodo (open source)",
         "tech": "JavaScript · MCP · Microsoft Graph",
         "url": "https://github.com/furkanzt/claude-mstodo",
@@ -98,17 +156,19 @@
         "links": []
       },
       {
-        "name": "claude-taste-detector (open source)",
-        "tech": "Shell · Claude Code hooks",
-        "url": "https://github.com/furkanzt/claude-taste-detector",
-        "text": "Claude Code plugin that wires Emil Kowalski's design-engineering guides to impeccable's detector findings through a global hook, so motion and feel guidance loads on the first UI edit.",
-        "links": []
-      },
-      {
+        "id": "yzt-curricula",
         "name": "yzt-curricula (METU AI Society)",
         "tech": "Markdown · Curriculum design",
         "url": "https://github.com/furkanzt/yzt-curricula",
         "text": "Open self-learning curricula for AI (programming fundamentals and generative AI tracks) written for METU AI Society members and anyone who wants to learn; 13 GitHub stars.",
+        "links": []
+      },
+      {
+        "id": "taste-detector",
+        "name": "claude-taste-detector (open source)",
+        "tech": "Shell · Claude Code hooks",
+        "url": "https://github.com/furkanzt/claude-taste-detector",
+        "text": "Claude Code plugin that wires Emil Kowalski's design-engineering guides to impeccable's detector findings through a global hook, so motion and feel guidance loads on the first UI edit.",
         "links": []
       }
     ],
@@ -133,7 +193,7 @@
       "Technical: Python, TypeScript, SQL / PostgreSQL, React, FastAPI, Fastify, Cloudflare Workers / D1 / Durable Objects, Docker, CI, LLM Integration (OpenAI, Anthropic, Gemini), LLM Evaluation, Prompt Engineering, Agentic development with Claude Code",
       "Languages: English (Full Professional Proficiency — YDS 83.75), Turkish (Native)"
     ],
-    "availability": "Open to AI-engineering and backend roles, Ankara or remote.",
+    "availability": "Open to new opportunities.",
     "location": "Ankara, Türkiye",
     "description": "Mustafa Furkan Özateş: AI-native engineer in Ankara. Production LLM systems built, tested and verified with coding agents.",
     "ui": {
@@ -150,7 +210,13 @@
       "openSource": "Open source",
       "viewOnGitHub": "View on GitHub",
       "playNow": "Play",
-      "cv": "CV (PDF)"
+      "cv": "CV (PDF)",
+      "howItWorks": "How it works",
+      "stepsCount": "{n} steps",
+      "stepOf": "Step {n} of {total}",
+      "back": "Back",
+      "next": "Next",
+      "goDeeper": "Go deeper"
     }
   },
   "tr": {
@@ -211,6 +277,7 @@
     },
     "projects": [
       {
+        "id": "agenting",
         "name": "claude-agenting (açık kaynak)",
         "tech": "Python · Claude Code hooks · Evals",
         "url": "https://github.com/furkanzt/claude-agenting",
@@ -218,13 +285,69 @@
         "links": []
       },
       {
+        "id": "tdd-bdd-harness",
         "name": "claude-tdd-bdd-harness (açık kaynak)",
         "tech": "Claude Code eklentisi · Gherkin · TDD/BDD",
         "url": "https://github.com/furkanzt/claude-tdd-bdd-harness",
         "text": "Herhangi bir depoda TDD ve BDD disiplinini kendiliğinden zorunlu kılan açık kaynaklı Claude Code eklentisi: makine tarafından doğrulanan test atıflarıyla çalıştırılabilir Gherkin senaryo kataloğu ve çekişmeli test denetimleri.",
-        "links": []
+        "links": [],
+        "art": {
+          "kind": "tdd",
+          "labels": {
+            "scenarios": "senaryolar",
+            "tests": "testler",
+            "check": "her push'ta denetim",
+            "gap": "@gap @wip"
+          }
+        },
+        "explain": {
+          "lead": "Bir programın vaat ettiği her davranış, gerçek bir teste bağlı ve sade bir dille yazılmış bir senaryoya dönüşür; çalışan bir kanıtı olmayan vaat derlemeyi (build) durdurur.",
+          "steps": [
+            {
+              "title": "Davranışı yaz",
+              "text": "Her davranış, ürünün her alanı için ayrı bir dosyada, sade bir dille kısa bir Given / When / Then senaryosu olarak yazılır."
+            },
+            {
+              "title": "Kanıtına bağla",
+              "text": "Her senaryo, kendisini kanıtlayan testi bir “Backed by” satırında belirtir; örneğin tests/test_pricing.py::test_discount_never_exceeds_cap."
+            },
+            {
+              "title": "Her push'ta bağlantıları denetle",
+              "text": "Her push'ta çalışan bir denetleyici; kanıtı olmayan, artık var olmayan bir teste atıf yapan bir senaryo ya da güncelliğini yitirmiş bir kapsam dizini bulduğunda derlemeyi durdurur."
+            },
+            {
+              "title": "Henüz kanıtlanmayanı işaretle",
+              "text": "Testi olmayan bir davranışa ancak açıkça @gap @wip etiketiyle izin verilir. Tek başına @gap derlemeyi durdurur; eksik sayısı sıfıra indiğinde bir daha artamaz."
+            }
+          ],
+          "deeper": [
+            "Atıflar üç biçimde çözülür: Python testleri (tests/x.py::test_fn), JavaScript testleri (web/src/x.test.ts > does the thing) ve yalnızca çalışan bir sistemin yürütebileceği denetimler (scripts/quality/checks.py::check_fn).",
+            "Denetleyicinin kendi kontrolleri, bilerek bozulmuş girdilerle kırmızı yol kanıtları olan saf fonksiyonlardır; yani denetleyicinin kendisi de test edilir.",
+            "Yeni bir test, atfını ancak koruduğu kodun bilerek değiştirilmiş (mutasyona uğratılmış) bir sürümünde başarısız olduktan sonra kazanır.",
+            "Çekişmeli bir denetim rehberi, yeşil bir testin yine de yanıltabileceği yolları (kendine atıf yapan sabitlemeler, boş fixture'lar gibi) listeler ve \"audit my tests\" denince tek başına çalışır.",
+            "Yalnızca çalışan bir sistemin gösterebileceği davranışlar @loop etiketli birinci sınıf senaryolardır: zamanlanmış olarak çalışır, atıfları yine her push'ta denetlenir.",
+            "Eklenti kurulumunda üç hook, oturum başında, test düzenlenirken ve commit sırasında Claude'a hatırlatma yapar. Hiçbiri engellemez; asıl kapı her push'taki denetleyicidir.",
+            "Kurulum isteğe bağlıdır: her projede bir kez sorar ve verilen hayır cevabını hatırlar.",
+            "İddia etmediği şey: denetleyici her senaryonun gerçek bir teste bağlandığını denetler, kodun her satırının bir senaryosu olduğunu değil. Kanıtlanmamış vaatleri görünür kılar."
+          ],
+          "links": [
+            {
+              "label": "Sözleşme (SKILL.md)",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/SKILL.md"
+            },
+            {
+              "label": "Çekişmeli denetim rehberi",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/skills/tdd-bdd-harness/reference/audit.md"
+            },
+            {
+              "label": "Sürüm notları (CHANGELOG)",
+              "url": "https://github.com/furkanzt/claude-tdd-bdd-harness/blob/main/CHANGELOG.md"
+            }
+          ]
+        }
       },
       {
+        "id": "kutie-games",
         "name": "Kutie games",
         "tech": "TypeScript · Cloudflare Workers · Durable Objects · D1",
         "url": null,
@@ -245,6 +368,7 @@
         ]
       },
       {
+        "id": "mstodo",
         "name": "claude-mstodo (açık kaynak)",
         "tech": "JavaScript · MCP · Microsoft Graph",
         "url": "https://github.com/furkanzt/claude-mstodo",
@@ -252,17 +376,19 @@
         "links": []
       },
       {
-        "name": "claude-taste-detector (açık kaynak)",
-        "tech": "Shell · Claude Code hooks",
-        "url": "https://github.com/furkanzt/claude-taste-detector",
-        "text": "Emil Kowalski'nin tasarım mühendisliği kılavuzlarını impeccable'ın dedektör bulgularına genel (global) bir hook ile bağlayan Claude Code eklentisi; ilk arayüz düzenlemesinde hareket ve his rehberi otomatik yüklenir.",
-        "links": []
-      },
-      {
+        "id": "yzt-curricula",
         "name": "yzt-curricula (ODTÜ Yapay Zekâ Topluluğu)",
         "tech": "Markdown · Müfredat tasarımı",
         "url": "https://github.com/furkanzt/yzt-curricula",
         "text": "ODTÜ Yapay Zekâ Topluluğu üyeleri ve öğrenmek isteyen herkes için yazılmış açık yapay zekâ öz-öğrenme müfredatları (programlama temelleri ve üretken yapay zekâ parkurları); GitHub'da 13 yıldız.",
+        "links": []
+      },
+      {
+        "id": "taste-detector",
+        "name": "claude-taste-detector (açık kaynak)",
+        "tech": "Shell · Claude Code hooks",
+        "url": "https://github.com/furkanzt/claude-taste-detector",
+        "text": "Emil Kowalski'nin tasarım mühendisliği kılavuzlarını impeccable'ın dedektör bulgularına genel (global) bir hook ile bağlayan Claude Code eklentisi; ilk arayüz düzenlemesinde hareket ve his rehberi otomatik yüklenir.",
         "links": []
       }
     ],
@@ -287,7 +413,7 @@
       "Teknik: Python, TypeScript, SQL / PostgreSQL, React, FastAPI, Fastify, Cloudflare Workers / D1 / Durable Objects, Docker, CI, LLM Entegrasyonu (OpenAI, Anthropic, Gemini), LLM Değerlendirmesi, Prompt Mühendisliği, Claude Code ile ajan tabanlı geliştirme",
       "Diller: İngilizce (Tam profesyonel yeterlilik — YDS 83.75), Türkçe (Ana dil)"
     ],
-    "availability": "Yapay zekâ mühendisliği ve backend rollerine açığım; Ankara veya uzaktan.",
+    "availability": "Yeni fırsatlara açığım.",
     "location": "Ankara, Türkiye",
     "description": "Mustafa Furkan Özateş: Ankara'da AI-native mühendis. Kodlama ajanlarıyla üretim LLM sistemleri kuran, test eden ve doğrulayan.",
     "ui": {
@@ -304,7 +430,13 @@
       "openSource": "Açık kaynak",
       "viewOnGitHub": "GitHub'da gör",
       "playNow": "Oyna",
-      "cv": "Özgeçmiş (PDF)"
+      "cv": "Özgeçmiş (PDF)",
+      "howItWorks": "Nasıl çalışır",
+      "stepsCount": "{n} adım",
+      "stepOf": "Adım {n} / {total}",
+      "back": "Geri",
+      "next": "İleri",
+      "goDeeper": "Daha derine in"
     }
   },
   "site": {

@@ -111,7 +111,7 @@ export function createScene(stage, getSelected) {
   let worldW = WORLD_H * LAYOUT.aspect;
   const toWorld = (nx, ny) => [(nx - 0.5) * worldW, (0.5 - ny) * WORLD_H];
 
-  let pal = readPalette();
+  const pal = readPalette();
   const disposables = [];
   const track = (o) => (disposables.push(o), o);
 
@@ -314,17 +314,6 @@ export function createScene(stage, getSelected) {
   const ro = new ResizeObserver(resize);
   ro.observe(stage);
   resize();
-
-  const schemeMQ = matchMedia("(prefers-color-scheme: dark)");
-  function onScheme() {
-    pal = readPalette();
-    lineMat.color.set(pal.lineHex);
-    routerMat.color.set(pal.neutralHex);
-    nuclei.forEach((n) => n.mat.color.setRGB(...pal.tier[n.id]));
-    pmat.blending = pal.dark ? AdditiveBlending : NormalBlending;
-    pmat.needsUpdate = true;
-  }
-  if (schemeMQ.addEventListener) schemeMQ.addEventListener("change", onScheme);
 
   let inView = true;
   const io = new IntersectionObserver((entries) => {
@@ -533,7 +522,6 @@ export function createScene(stage, getSelected) {
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
-      if (schemeMQ.removeEventListener) schemeMQ.removeEventListener("change", onScheme);
       stage.removeEventListener("pointermove", onMove);
       stage.removeEventListener("pointerleave", onLeave);
       routeGroup.children.forEach((c) => c.geometry.dispose());

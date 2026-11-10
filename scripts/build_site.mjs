@@ -54,6 +54,8 @@ const JS_NUMERIC_CONSTANTS = new Set([
   "4294967296", // 2^32 (our PRNG, mulberry32)
   "2147483647", // 2^31 - 1 (three.js)
   "1831565813", // 0x6d2b79f5, the mulberry32 increment
+  "1431655765", // 0x55555555, a bit-interleaving mask (three.js)
+  "10000000000000001", // the mantissa of 10000000000000001e-32, a float epsilon (three.js Line3)
 ]);
 const EMAIL = /[A-Za-z0-9._-]+@[A-Za-z0-9-]+\.[A-Za-z.]+/g;
 // Words that must never be served (private names and handles). The list itself is private, so

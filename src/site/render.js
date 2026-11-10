@@ -2,6 +2,8 @@
 // output into the static pages, and the browser calls the same functions when the language
 // toggle swaps the text in place, so the raw HTML and the toggled page cannot drift apart.
 
+import { ART, renderArtPoster, artSteps } from "./card-art.js";
+
 /* ------------------------------------------------------------------ */
 /* Shared layout of the figure, in normalised stage coordinates (0..1). */
 /* The static poster, the 3D scene and the tier buttons all read this.  */
@@ -215,8 +217,69 @@ function renderExperience(t) {
   );
 }
 
+const CHEVRON =
+  '<svg class="ic xp-chev" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 6.25 8 10.25l4-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>';
+
+/** "{n} steps" style strings from content.json. */
+const fill = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (all, k) => (k in vars ? String(vars[k]) : all));
+
+// The illustration of one card: the static drawing plus its text labels (positioned from the
+// shared layout). aria-hidden: everything it shows is also said in the explainer text.
+function renderArt(p) {
+  if (!p.art) return "";
+  const layout = ART[p.art.kind];
+  const labels = Object.entries(p.art.labels || {})
+    .map(([key, text]) => {
+      const a = layout.labels[key];
+      if (!a) throw new Error(`card art ${p.art.kind}: no anchor for label "${key}"`);
+      return `<span class="pv-label pv-label--${key}" data-anchor="${key}" style="left:${pct(a.x)};top:${pct(a.y)}">${esc(text)}</span>`;
+    })
+    .join("");
+  return (
+    `<figure class="pv" data-art="${esc(p.art.kind)}" aria-hidden="true">` +
+    `<div class="pv-stage">${renderArtPoster(p.art.kind)}<div class="pv-labels">${labels}</div></div>` +
+    `</figure>`
+  );
+}
+
+// The layered explainer: a plain <details>, so it opens without JavaScript and the whole text
+// is in the raw HTML. The script adds the step navigation and syncs the illustration.
+function renderExplain(p, ui) {
+  const x = p.explain;
+  if (!x) return "";
+  if (p.art && artSteps(p.art.kind) !== x.steps.length) {
+    throw new Error(`${p.id}: ${x.steps.length} steps in content.json, the ${p.art.kind} illustration has ${artSteps(p.art.kind)}`);
+  }
+  const steps = x.steps
+    .map(
+      (st, k) =>
+        `<li class="xp-step" data-step="${k}"><span class="xp-n" aria-hidden="true">${k + 1}</span>` +
+        `<div class="xp-st"><p class="xp-st-t">${esc(st.title)}</p><p class="xp-st-x">${esc(st.text)}</p></div></li>`
+    )
+    .join("");
+  const facts = (x.deeper || []).map((d) => `<li>${esc(d)}</li>`).join("");
+  const links = (x.links || [])
+    .map((l) => `<li><a href="${esc(l.url)}">${esc(l.label)}${ARROW}</a></li>`)
+    .join("");
+  const deeper = facts
+    ? `<details class="xp-deep"><summary class="xp-deep-sum"><span>${esc(ui.goDeeper)}</span>${CHEVRON}</summary>` +
+      `<div class="xp-deep-body"><ul class="xp-facts">${facts}</ul>${links ? `<ul class="xp-links">${links}</ul>` : ""}</div></details>`
+    : "";
+  return (
+    `<details class="xp" id="xp-${esc(p.id)}">` +
+    `<summary class="xp-sum"><span class="xp-sum-t">${esc(ui.howItWorks)}</span><span class="xp-sum-n">${esc(fill(ui.stepsCount, { n: x.steps.length }))}</span>${CHEVRON}</summary>` +
+    `<div class="xp-body">` +
+    (x.lead ? `<p class="xp-lead">${esc(x.lead)}</p>` : "") +
+    `<ol class="xp-steps">${steps}</ol>` +
+    `<div class="xp-nav" hidden><button type="button" class="xp-btn" data-dir="-1">${esc(ui.back)}</button>` +
+    `<p class="xp-count" aria-live="polite" data-tpl="${esc(ui.stepOf)}"></p>` +
+    `<button type="button" class="xp-btn xp-btn--next" data-dir="1">${esc(ui.next)}</button></div>` +
+    deeper +
+    `</div></details>`
+  );
+}
+
 function renderProject(p, i, ui) {
-  const variant = i === 0 ? "feature" : p.links && p.links.length ? "games" : i === 1 ? "row" : "trio";
   let foot = "";
   if (p.url) {
     foot = `<p class="proj-link"><a href="${esc(p.url)}">${esc(ui.viewOnGitHub)}${ARROW}</a><code class="repo">${esc(repoOf(p.url))}</code></p>`;
@@ -233,11 +296,15 @@ function renderProject(p, i, ui) {
         .join("") +
       `</ul><p class="note">${esc(ui.gamesNote)}</p>`;
   }
+  const art = renderArt(p);
   return (
-    `<article class="proj proj--${variant}">` +
+    `<article class="proj${art ? " proj--art" : ""}"${p.id ? ` id="p-${esc(p.id)}" data-proj="${esc(p.id)}"` : ""}>` +
+    art +
+    `<div class="proj-body">` +
     `<div class="proj-id"><h3 class="proj-name">${esc(p.name)}</h3><p class="proj-tech">${esc(p.tech)}</p></div>` +
     `<div class="proj-main"><p class="proj-text">${esc(p.text)}</p>${plays}${foot}</div>` +
-    `</article>`
+    renderExplain(p, ui) +
+    `</div></article>`
   );
 }
 

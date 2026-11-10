@@ -7,6 +7,8 @@ import content from "../../content/content.json";
 import { renderSlots, renderPin, LAYOUT } from "./render.js";
 import { pick, STORAGE_KEY } from "./lang.js";
 import { createScene } from "./scene.js";
+import { createCards } from "./cards.js";
+import { createExplainers } from "./explain.js";
 
 window.__langPick = pick;
 
@@ -52,7 +54,14 @@ const state = {
   rendered: root.lang === "tr" ? "tr" : "en", // the language the body text is in right now
   selected: null,
   scene: null,
+  cards: null, // the live card illustrations (null: the static drawings show)
 };
+
+const explain = createExplainers({
+  onFocus: (pv, words) => {
+    if (state.cards) state.cards.setFocus(pv, words);
+  },
+});
 
 /* Email addresses are assembled here, so the served files never hold a full address. */
 function fillEmails() {
@@ -70,12 +79,18 @@ function setLang(lang) {
   const t = content[lang];
   if (!t) return;
   if (lang !== state.rendered) {
+    // The sections are re-rendered: remember the open explainers and let go of the live
+    // illustrations first, then wire the new markup the same way.
+    const open = explain.snapshot();
+    if (state.cards) state.cards.unmount();
     const slots = renderSlots(content, lang);
     for (const name of Object.keys(slots)) {
       const el = doc.querySelector(`[data-slot="${name}"]`);
       if (el) el.innerHTML = slots[name];
     }
     state.rendered = lang;
+    if (state.cards) state.cards.mount(doc);
+    explain.mount(doc, open);
   }
   state.lang = lang;
   fillEmails();
@@ -202,6 +217,9 @@ function wire() {
 }
 
 wire();
+explain.mount(doc);
+explain.openFromHash();
+window.addEventListener("hashchange", () => explain.openFromHash());
 {
   const forced = doc.body.getAttribute("data-force") || "";
   const nav = window.navigator;
@@ -229,8 +247,19 @@ function canRun3D() {
   }
 }
 
+function startCards() {
+  if (state.cards) return;
+  try {
+    state.cards = createCards();
+    state.cards.mount(doc);
+  } catch (err) {
+    state.cards = null;
+  }
+}
+
 function start3D() {
   if (state.scene || !canRun3D()) return;
+  startCards();
   const stage = stageEl();
   if (!stage) return;
   try {
@@ -246,6 +275,10 @@ function start3D() {
 }
 
 function stop3D() {
+  if (state.cards) {
+    state.cards.dispose();
+    state.cards = null;
+  }
   if (!state.scene) return;
   state.scene.dispose();
   state.scene = null;
