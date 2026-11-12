@@ -118,7 +118,7 @@ function renderLead(text) {
 function renderHero(t, site, lang) {
   return (
     `<section class="ov" id="overview" aria-labelledby="ov-name"><div class="wrap ov-inner">` +
-    `<img class="ov-photo" src="/assets/img/headshot.webp" width="96" height="96" alt="" decoding="async">` +
+    `<img class="ov-photo" src="/assets/img/avatar.svg" width="96" height="96" alt="" decoding="async">` +
     `<h1 class="ov-name" id="ov-name">${esc(t.name)}</h1>` +
     `<p class="ov-headline">${esc(t.home.hero.headline)}</p>` +
     `<p class="ov-sub">${renderLead(t.headline)}</p>` +

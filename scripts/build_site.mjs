@@ -220,7 +220,7 @@ for (const page of PAGES) {
 const problems = [];
 const hostsSeen = {};
 for (const [path, buf] of files) {
-  const kind = path.endsWith(".js") ? "js" : path.endsWith(".html") ? "html" : path.endsWith(".css") ? "css" : null;
+  const kind = path.endsWith(".js") ? "js" : path.endsWith(".html") || path.endsWith(".svg") ? "html" : path.endsWith(".css") ? "css" : null;
   if (!kind) continue;
   const r = guard(path, buf.toString("utf8"), kind);
   problems.push(...r.problems);
